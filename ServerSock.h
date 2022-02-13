@@ -14,4 +14,10 @@ class Server {
  public:
   Server(std::string hostname, std::string port) : hostname(hostname), port(port) {}
   int buildSocket();
+  /*
+
+
+
+  */
+  int recv_http_response(int sockfd, );
 };

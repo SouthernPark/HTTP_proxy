@@ -1,12 +1,12 @@
 #include <arpa/inet.h>
+#include <unistd.h>
 
-#include <iostream>
+#include <fstream>
 
-#include "Utility.h"
-
+#include "ServerSock.h"
 int main(void) {
-  std::string host_name = "127.0.0.1";
-  std::string port = "4444";
+  std::string host_name = "go.com";
+  std::string port = "80";
   struct addrinfo * servinfo;
   int fd = Utility::sock_(host_name, port, &servinfo);
 
@@ -14,13 +14,33 @@ int main(void) {
 
   printf("ip is at: %s\n", inet_ntoa(internet_addr->sin_addr));
 
+  //build up the request header
+  std::stringstream stream;
+
+  std::string method = "GET";
+  std::string url = "/";
+
+  std::string user_agent =
+      "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) "
+      "Chrome/98.0.4758.80 Safari/537.36 Edg/98.0.1108.50";
+  std::string accept_language = "zh-CN,zh;q=0.9,en;q=0.8,en-GB;q=0.7,en-US;q=0.6";
+  std::string accept_ =
+      "text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,image/apng,*/"
+      "*;q=0.8,application/signed-exchange;v=b3;q=0.9";
+  stream << method << " " << url << " HTTP/1.1"
+         << "\r\n"
+         << "Host: " << host_name << "\r\n"
+         << "Accept-Language: " << accept_language << "\r\n"
+         << "accept: " << accept_ << "\r\n"
+         << "\r\n";
+
+  //connect
   int status = Utility::connect_(fd, servinfo);
 
-  std::cout << "status is " << status << std::endl;
+  //send the header
+  std::string header = stream.str();
+  std::vector<char> buffer(header.begin(), header.end());
 
-  //test send
-  std::string mess = "123456789012345678901234567890";
-  std::vector<char> buffer(mess.begin(), mess.end());
   status = Utility::send_(fd, buffer);
   if (status == -1) {
     std::cerr << "Can not send\n";
@@ -28,7 +48,26 @@ int main(void) {
   }
   //so not close the sock
   std::cout << "The message has been sent\n";
-  while (1) {
-  }
+
+  ServerSock serv_sock("go.com", "80");
+  serv_sock.sockfd = fd;
+  Response resp;
+  serv_sock.recv_http_response(resp);
+
+  //check the response header
+
+  //check header
+  std::string head(resp.header.begin(), resp.header.end());
+  //std::cout << head << std::endl;
+  std::ofstream header_file("test.header");
+  header_file << head;
+
+  //check body
+  std::string body(resp.body.begin(), resp.body.end());
+  //std::cout << body << std::endl;
+  std::ofstream body_file("test.html");
+  body_file << body;
+
+  close(fd);
   freeaddrinfo(servinfo);
 }

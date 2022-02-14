@@ -150,3 +150,22 @@ int Utility::recv_(int sockfd, std::vector<char> & mess) {
   }
   return status;
 }
+
+std::vector<std::string> * Utility::split(std::string & input, std::string & delimiter) {
+  std::vector<std::string> * res = new std::vector<std::string>;
+
+  int start = 0;
+  int end = input.find(delimiter);
+
+  while (end != -1) {
+    res->push_back(input.substr(start, end - start));
+    start = end + delimiter.size();
+    end = input.find(delimiter, start);
+  }
+
+  if (start != input.size()) {
+    res->push_back(input.substr(start, input.size() - start));
+  }
+
+  return res;
+}

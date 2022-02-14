@@ -1,4 +1,3 @@
-#include "Response.h"
 #include "macro.h"
 
 class Utility {
@@ -54,12 +53,5 @@ class Utility {
   */
   static int connect_(int sockfd, struct addrinfo * service_info);
 
-  /*
-    this function is used to get the http response
-    @param sockfd the fd you want to hear from server
-    @param rsp where you store the response which includes
-           the header and the body 
-  */
-
-  static int recv_Http_response(int sockfd, Response & rsp);
+  static std::vector<std::string> * split(std::string & input, std::string & delimiter);
 };

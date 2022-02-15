@@ -2,10 +2,7 @@
 #define SERVERSOCK_H
 
 #include "Response.h"
-#include "Utility.h"
 #include "macro.h"
-
-#endif
 
 /*
     Client <======> Proxy <======> Server 
@@ -51,7 +48,7 @@ class ServerSock {
         -1  if an error happens
         elsee return the number of bytes we have sent 
   */
-  int send_(int sockfd, std::vector<char> & mess);
+  int send_(std::vector<char> & mess);
 
   /*
     This function will get heep response from the sockfd and transfer
@@ -80,3 +77,5 @@ class ServerSock {
   */
   int recv_rest_response(Response & resp, int haveReceive, int total);
 };
+
+#endif

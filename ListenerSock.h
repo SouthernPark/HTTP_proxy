@@ -6,8 +6,6 @@
 #include "ClientSock.h"
 #include "macro.h"
 
-#endif
-
 class ListenerSock {
  public:
   int sockfd;
@@ -32,3 +30,5 @@ class ListenerSock {
   */
   int accept_(ClientSock & client);
 };
+
+#endif

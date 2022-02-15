@@ -24,5 +24,16 @@ int main() {
 
   req.parseHeader();
   std::cout << std::string(req.header.begin(), req.header.end());
+
+  ServerSock server(req.header_kvs["host"], "80");
+  server.buildSocket();
+  server.connect();
+  server.send_(req.header);
+  Response resp;
+  server.recv_http_response(resp);
+  std::cout << std::string(resp.header.begin(), resp.header.end());
+  std::cout << std::string(resp.body.begin(), resp.body.end());
   //create a server sock
+  client.send_(resp.header);
+  client.send_(resp.body);
 }

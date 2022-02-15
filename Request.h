@@ -1,9 +1,11 @@
 #ifndef REQUEST_H
 #define REQUEST_H
+#include <memory>
+#include <string>
+#include <unordered_map>
+#include <vector>
 
-#include "Response.h"
-
-#endif
+#include "Utility.h"
 
 /*
   Request same as response
@@ -25,5 +27,7 @@ class Request {
 
   Request() : parsed(false) {}
 
-  virtual void parseHeader();
+  void parseHeader();
 };
+
+#endif

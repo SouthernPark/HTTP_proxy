@@ -6,6 +6,8 @@ void parseRequestLine(Request & req) {
 
   if ((*res).size() >= 3) {
     req.request_method = (*res)[0];
+    req.request_url = (*res)[1];
+    req.protocol = (*res)[2];
   }
 }
 
@@ -26,6 +28,7 @@ void Request::parseHeader() {
     //then
     this->request_line = *it;
     //parse the request line
+    parseRequestLine(*this);
   }
 
   it++;

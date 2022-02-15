@@ -1,10 +1,10 @@
 #ifndef CLIENTSOCK_H
 #define CLIENTSOCK_H
+#include <sys/socket.h>
 #include <unistd.h>
 
 #include "Request.h"
-
-#endif
+#include "Utility.h"
 
 class ClientSock {
   /*When the user connects to our proxy the listener 
@@ -87,3 +87,5 @@ class ClientSock {
   */
   int recv_rest_request(Request & req, int haveReceive, int total);
 };
+
+#endif

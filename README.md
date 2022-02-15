@@ -72,7 +72,15 @@ Other thing about HTTP response header:
 
     when you call recv(..., 10, 0);
     Recv will recv all which is "1234567890"
-    
+
+# Connect
+
+CONNECT server.example.com:433 HTTP/1.1
+Host: server.example.com:433
+Proxy-Authorization: basic aGVsbG86d29ybGQ=
+
+When connect request, you have to parse the port number
+to build sock
 
 
 

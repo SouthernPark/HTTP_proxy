@@ -3,8 +3,6 @@
 
 #include "macro.h"
 
-#endif
-
 class Utility {
  public:
   /*
@@ -60,3 +58,4 @@ class Utility {
 
   static std::vector<std::string> * split(std::string & input, std::string & delimiter);
 };
+#endif

@@ -46,9 +46,18 @@ int ServerSock::recv_http_response(Response & resp) {
   }
 
   resp.parseHeader();
-  std::string content_length = resp.header_kvs["content-length"];
 
-  this->recv_rest_response(resp, body_in_header, std::stoi(content_length));
+  auto content_length = resp.header_kvs.find("content-length");
+
+  if (content_length == resp.header_kvs.end()) {
+    std::cerr << "" << std::endl;
+    return -2;
+  }
+
+  this->recv_rest_response(resp, body_in_header, std::stoi((*content_length).second));
+
+  // this->recv_rest_response(resp, body_in_header, 100);
+
   return status;
 }
 
@@ -71,6 +80,24 @@ int ServerSock::recv_rest_response(Response & resp, int haveReceive, int total) 
     resp.body.insert(resp.body.end(), buffer.begin(), buffer.end());
     total -= status;
   }
+
+  //recv the bytes until the totoal is not \r\n
+  // const char * CRLF = "\r\n\r\n";
+  // auto it = std::search(resp.body.begin(), resp.body.end(), CRLF, CRLF + strlen(CRLF));
+  // while (it == resp.body.end()) {
+  //   status = Utility::recv_(this->sockfd, buffer);
+  //   if (status == -1) {
+  //     std::cerr << "Can not recv from the client" << std::endl;
+  //     return -1;
+  //   }
+  //   if (status == 0) {
+  //     std::cerr << "Disconnect with the origin server" << std::endl;
+  //     return 0;
+  //   }
+  //   resp.body.insert(resp.body.end(), buffer.begin(), buffer.end());
+  //   it = std::search(resp.body.begin(), resp.body.end(), CRLF, CRLF + strlen(CRLF));
+  // }
+
   return status;
 }
 
@@ -95,7 +122,7 @@ int ServerSock::connect() {
   return status;
 }
 
-int ServerSock::send_(int sockfd, std::vector<char> & mess) {
+int ServerSock::send_(std::vector<char> & mess) {
   int status = Utility::send_(this->sockfd, mess);
   if (status == -1) {
     std::cerr << "The mess can not be sent" << std::endl;

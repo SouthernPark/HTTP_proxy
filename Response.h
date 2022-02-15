@@ -7,7 +7,6 @@
 #include <vector>
 
 #include "Utility.h"
-#endif
 
 class Response {
  public:
@@ -23,3 +22,4 @@ class Response {
 
   virtual void parseHeader();
 };
+#endif

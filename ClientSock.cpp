@@ -1,5 +1,7 @@
 #include "ClientSock.h"
 
+#include "MyExceptions.h"
+
 /*
     This function will get heep response from the sockfd and transfer
     the byte stream to Response object including the header and body.
@@ -50,6 +52,8 @@ int ClientSock::recv_http_request(Request & resp) {
       resp.header_kvs.find(std::string("content-length"));
 
   if (length == resp.header_kvs.end()) {
+    //there should be content-length filed in the request header
+    throw no_content_length();
     return status;
   }
   this->recv_rest_request(resp, body_in_header, std::stoi(length->second));

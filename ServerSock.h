@@ -1,22 +1,36 @@
 #ifndef SERVERSOCK_H
 #define SERVERSOCK_H
 
+#include <memory>
+#include <string>
+
+#include "MyExceptions.h"
 #include "Response.h"
 #include "macro.h"
-
 /*
     Client <======> Proxy <======> Server 
     This class is used to connect with the client for proxy, 
     including the following steps 
 */
 class ServerSock {
+ private:
+  /*
+    This fucntion will be used to recv the http response header
+    Note that: cause the response is sent in stream, we may also recv
+    part of the body during recving header.
+    Those part of body will be stored in resp.body.
+    @ return 
+        -1 if can not recv
+        0 if the sock is closed
+  */
+  int recv_response_header(Response & resp);
+
  public:
   int sockfd;
   std::string hostname;
   std::string port;
   struct addrinfo * servinfo;
 
- public:
   ServerSock(std::string hostname, std::string port) : hostname(hostname), port(port) {}
 
   ~ServerSock() {
@@ -56,26 +70,64 @@ class ServerSock {
 
     @param: resp where to store the resp
 
-    return 
+    @ return 
         -1 if can not recv
         0 if the sock is closed
+    @Throws
+        no_content_length if there is no content_length arrtibute in the header      
   */
   int recv_http_response(Response & resp);
 
  private:
   /*
+    This function is used when the response header has the content-length
+    filed. Else, we need to check transfer encoding "transfer-encoding"
+    to see which kind of encoding shema the response is using
+
     After receive header, we have to receive the html.
     But when receive header we may receive part of the body.
     in recv_http_response, I have add the received body part into
     the body.
     This funcion will be used to receive the rest of the http response.
     @param: where you put the rest of the body
-    @param: haveReceived is how many bytes you have received when receiving
-            header
     @param: total is the size of message body which comes by parsing the
             html header
   */
-  int recv_rest_response(Response & resp, int haveReceive, int total);
+  int recv_rest_response(Response & resp, int total);
+
+  /*
+    This function will receive the rest of the chunked data and store
+    them in the resp.body.
+    return 
+        -1 if can not recv
+        0 if disconnect from the server
+
+    PS: refer 
+    https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Transfer-Encoding
+    for more info about chunked data
+
+    The chuked data is combosed by:
+    num\r\n
+    ...\r\n
+    ...\r\n
+    ...\r\n
+    0\r\n
+    Trailers\r\n
+    \r\n
+
+    The chunked data is end with \r\n\r\n 
+  */
+  int recv_rest_chunked(Response & resp);
+
+  /*
+    This function will parse the trailer
+    trailer has key value pairs that has the same effect
+    in the header.
+    Therefore it will be added to the resp.header_kvs field.
+    This function will be used in the recv_rest_chunked method
+    after receiving the chunked data
+  */
+  void parse_trailer(Response & resp);
 };
 
 #endif

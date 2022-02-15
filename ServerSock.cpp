@@ -1,15 +1,6 @@
 #include "ServerSock.h"
 
-/*
-    This function will get heep response from the sockfd and transfer
-    the byte stream to Response object including the header and body.
-
-    return 
-        -1 if can not recv
-        0 if the sock is closed
-*/
-
-int ServerSock::recv_http_response(Response & resp) {
+int ServerSock::recv_response_header(Response & resp) {
   int status = 1;
   std::vector<char> header;
   std::vector<char> buffer;
@@ -36,33 +27,50 @@ int ServerSock::recv_http_response(Response & resp) {
     resp.header.push_back(*it);
     it++;
   }
-  //how many bytes are recved when we just want header
-  int body_in_header = 0;
+
   //push the bytes after header into body
   while (it != header.end()) {
     resp.body.push_back(*it);
     it++;
-    body_in_header++;
+  }
+
+  return status;
+}
+
+int ServerSock::recv_http_response(Response & resp) {
+  int status = recv_response_header(resp);
+
+  if (status == -1) {
+    std::cerr << "Can not recv from the server" << std::endl;
+    return -1;
+  }
+
+  if (status == 0) {
+    std::cerr << "Server closed" << std::endl;
   }
 
   resp.parseHeader();
 
   auto content_length = resp.header_kvs.find("content-length");
 
+  //check if we have content-length in the header
   if (content_length == resp.header_kvs.end()) {
-    std::cerr << "" << std::endl;
-    return -2;
+    //do not have content-length in the header
+    std::cerr << "No content-length is found in the header. Check chunked " << std::endl;
+    std::cerr << "Checking chunked transfer type" << std::endl;
+
+    status = this->recv_rest_chunked(resp);
   }
-
-  this->recv_rest_response(resp, body_in_header, std::stoi((*content_length).second));
-
-  // this->recv_rest_response(resp, body_in_header, 100);
+  else {
+    //we get the content length in the header
+    status = this->recv_rest_response(resp, std::stoi((*content_length).second));
+  }
 
   return status;
 }
 
-int ServerSock::recv_rest_response(Response & resp, int haveReceive, int total) {
-  total -= haveReceive;
+int ServerSock::recv_rest_response(Response & resp, int total) {
+  total -= resp.body.size();  //some part of the body has been stored in the resp.body
   std::vector<char> buffer;
   int status = 1;
 
@@ -81,22 +89,32 @@ int ServerSock::recv_rest_response(Response & resp, int haveReceive, int total) 
     total -= status;
   }
 
-  //recv the bytes until the totoal is not \r\n
-  // const char * CRLF = "\r\n\r\n";
-  // auto it = std::search(resp.body.begin(), resp.body.end(), CRLF, CRLF + strlen(CRLF));
-  // while (it == resp.body.end()) {
-  //   status = Utility::recv_(this->sockfd, buffer);
-  //   if (status == -1) {
-  //     std::cerr << "Can not recv from the client" << std::endl;
-  //     return -1;
-  //   }
-  //   if (status == 0) {
-  //     std::cerr << "Disconnect with the origin server" << std::endl;
-  //     return 0;
-  //   }
-  //   resp.body.insert(resp.body.end(), buffer.begin(), buffer.end());
-  //   it = std::search(resp.body.begin(), resp.body.end(), CRLF, CRLF + strlen(CRLF));
-  // }
+  return status;
+}
+
+int ServerSock::recv_rest_chunked(Response & resp) {
+  //use "0\r\n" to detect the end of the chunk
+  const char * CRLF = "\r\n\r\n";
+
+  std::vector<char> buffer;
+  int status = 1;
+  //check if the resp.body has already contained the CRLF
+  auto it = std::search(resp.body.begin(), resp.body.end(), CRLF, CRLF + strlen(CRLF));
+  while (it == resp.body.end()) {
+    status = Utility::recv_(this->sockfd, buffer);
+    if (status == -1) {
+      std::cerr << "Can not recv from the client" << std::endl;
+      return -1;
+    }
+    if (status == 0) {
+      std::cerr << "Disconnect with the origin server" << std::endl;
+      return 0;
+    }
+    resp.body.insert(resp.body.end(), buffer.begin(), buffer.end());
+    it = std::search(resp.body.begin(), resp.body.end(), CRLF, CRLF + strlen(CRLF));
+  }
+  //parse trailer
+  parse_trailer(resp);
 
   return status;
 }
@@ -130,4 +148,29 @@ int ServerSock::send_(std::vector<char> & mess) {
   }
 
   return status;
+}
+
+void ServerSock::parse_trailer(Response & resp) {
+  //find the "0\r\n"
+  const char * del = "0\r\n";
+  auto it = std::search(resp.body.begin(), resp.body.end(), del, del + strlen(del));
+
+  std::string trailer(it + 3, resp.body.end());
+  std::string CRLF = "\r\n";
+  std::string del2 = ": ";
+  //there is no trailer
+  if (trailer.compare(CRLF) != 0) {
+    //split the trailer using CRLF
+    std::unique_ptr<std::vector<std::string> > res(Utility::split(trailer, CRLF));
+    //split the trailer using ": "
+    for (int i = 0; i < (*res).size(); i++) {
+      //add kvs[0]:kvs[1] to the unordered_map
+      std::unique_ptr<std::vector<std::string> > kvs(Utility::split((*res)[i], del2));
+      if ((*kvs).size() >= 2) {
+        if (!(*kvs)[0].empty() && !(*kvs)[1].empty()) {
+          resp.header_kvs[(*kvs)[0]] = (*kvs)[1];
+        }
+      }
+    }
+  }
 }

@@ -1,4 +1,5 @@
 #include "ServerSock.h"
+
 /*
     This function will get heep response from the sockfd and transfer
     the byte stream to Response object including the header and body.
@@ -46,7 +47,7 @@ int ServerSock::recv_http_response(Response & resp) {
 
   resp.parseHeader();
   std::string content_length = resp.header_kvs["content-length"];
-  std::cout << content_length << std::endl;
+
   this->recv_rest_response(resp, body_in_header, std::stoi(content_length));
   return status;
 }
@@ -70,5 +71,36 @@ int ServerSock::recv_rest_response(Response & resp, int haveReceive, int total) 
     resp.body.insert(resp.body.end(), buffer.begin(), buffer.end());
     total -= status;
   }
+  return status;
+}
+
+int ServerSock::buildSocket() {
+  int sockfd = Utility::sock_(this->hostname, this->port, &(this->servinfo));
+  if (sockfd == -1) {
+    std::cerr << "Can not create the sock" << std::endl;
+    return -1;
+  }
+
+  this->sockfd = sockfd;
+  return sockfd;
+}
+
+int ServerSock::connect() {
+  int status = Utility::connect_(this->sockfd, this->servinfo);
+  if (status == -1) {
+    std::cerr << "Can not connect to the server" << std::endl;
+    return -1;
+  }
+
+  return status;
+}
+
+int ServerSock::send_(int sockfd, std::vector<char> & mess) {
+  int status = Utility::send_(this->sockfd, mess);
+  if (status == -1) {
+    std::cerr << "The mess can not be sent" << std::endl;
+    return -1;
+  }
+
   return status;
 }

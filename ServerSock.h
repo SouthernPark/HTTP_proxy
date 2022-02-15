@@ -1,7 +1,12 @@
-#include <algorithm>
+#ifndef SERVERSOCK_H
+#define SERVERSOCK_H
 
 #include "Response.h"
+#include "Utility.h"
 #include "macro.h"
+
+#endif
+
 /*
     Client <======> Proxy <======> Server 
     This class is used to connect with the client for proxy, 
@@ -16,7 +21,38 @@ class ServerSock {
 
  public:
   ServerSock(std::string hostname, std::string port) : hostname(hostname), port(port) {}
+
+  ~ServerSock() {
+    close(sockfd);
+    freeaddrinfo(servinfo);
+  }
+
+  /*
+    This function will create a sock using the given hostname and port.
+    this->sockfd will be set on success
+    return -1 if can not build the sock
+  */
   int buildSocket();
+
+  /*
+    This function will connect the sock to the server with this->hostname and
+    this->port
+    return -1 if can not connect
+  */
+  int connect();
+
+  /*
+    This function will call the Utility::send() to send bytes in mess.
+    This function will send char in mess in series chunk
+    with chunk size MESS_SIZE to the specified sock.
+    @param: sockfd is the sock fd we want to send mess to
+    @param: mess is the message we will send to the sockfd
+    @return 
+        -1  if an error happens
+        elsee return the number of bytes we have sent 
+  */
+  int send_(int sockfd, std::vector<char> & mess);
+
   /*
     This function will get heep response from the sockfd and transfer
     the byte stream to Response object including the header and body.

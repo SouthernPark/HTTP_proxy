@@ -3,7 +3,8 @@
     This function build a socket with the host and port provided and
     return the sock file descriptor.
     @param: host is the hostname or ip you want to connect 
-            if you want to build listener please specify host as NULL
+            if hostname is "", that means NULL 
+            if you want to build listener please specify host as ""
     @param: port is which port you want to connect
             "0" if you want to bind to a random available port
 
@@ -30,7 +31,10 @@ int Utility::sock_(std::string & hostname,
   strcpy(hostname_array, hostname.c_str());
   strcpy(port_array, port.c_str());
 
-  if ((status = getaddrinfo(hostname_array, port_array, &hints, servinfo)) != 0) {
+  //if hostname is "", we give null, else we give hostname array
+  if ((status = getaddrinfo(
+           hostname.size() == 0 ? NULL : hostname_array, port_array, &hints, servinfo)) !=
+      0) {
     std::cerr << "getaddrinfo error: " << gai_strerror(status) << std::endl;
     return -1;
   }

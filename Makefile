@@ -19,3 +19,6 @@ test_response: Utility.cpp test.cpp ServerSock.cpp
 
 test_utility: Utility.cpp UtilityTest.cpp
 	g++ -g -o test_utility Utility.cpp UtilityTest.cpp
+
+test_listener: Utility.cpp ClientSock.cpp ListenerSock.cpp test_listener.cpp Request.h 
+	g++ -g -o test_listener Utility.cpp ClientSock.cpp ListenerSock.cpp Response.cpp test_listener.cpp

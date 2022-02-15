@@ -1,4 +1,9 @@
+#ifndef UTILITY_H
+#define UTILITY_H
+
 #include "macro.h"
+
+#endif
 
 class Utility {
  public:

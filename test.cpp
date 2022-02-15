@@ -5,12 +5,16 @@
 
 #include "ServerSock.h"
 int main(void) {
+  //create a server sock that will help us create sock, send request and receive response
+
   std::string host_name = "go.com";
   std::string port = "80";
-  struct addrinfo * servinfo;
-  int fd = Utility::sock_(host_name, port, &servinfo);
+  ServerSock sock(host_name, port);
 
-  struct sockaddr_in * internet_addr = (struct sockaddr_in *)servinfo->ai_addr;
+  //create the sock
+  sock.buildSocket();
+
+  struct sockaddr_in * internet_addr = (struct sockaddr_in *)sock.servinfo->ai_addr;
 
   printf("ip is at: %s\n", inet_ntoa(internet_addr->sin_addr));
 
@@ -35,13 +39,13 @@ int main(void) {
          << "\r\n";
 
   //connect
-  int status = Utility::connect_(fd, servinfo);
+  int status = sock.connect();
 
   //send the header
   std::string header = stream.str();
   std::vector<char> buffer(header.begin(), header.end());
+  status = sock.send(sock.sockfd, buffer);
 
-  status = Utility::send_(fd, buffer);
   if (status == -1) {
     std::cerr << "Can not send\n";
     return 0;
@@ -49,10 +53,8 @@ int main(void) {
   //so not close the sock
   std::cout << "The message has been sent\n";
 
-  ServerSock serv_sock("go.com", "80");
-  serv_sock.sockfd = fd;
   Response resp;
-  serv_sock.recv_http_response(resp);
+  sock.recv_http_response(resp);
 
   //check the response header
 
@@ -67,7 +69,4 @@ int main(void) {
   //std::cout << body << std::endl;
   std::ofstream body_file("test.html");
   body_file << body;
-
-  close(fd);
-  freeaddrinfo(servinfo);
 }

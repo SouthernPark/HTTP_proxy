@@ -1,11 +1,17 @@
+#ifndef RESPONSE_H
+#define RESPONSE_H
+
 #include <memory>
 #include <string>
 #include <unordered_map>
 #include <vector>
 
 #include "Utility.h"
+#endif
+
 class Response {
  public:
+  std::string first_line;
   std::vector<char> header;
   std::vector<char> body;
 
@@ -15,5 +21,5 @@ class Response {
 
   Response() : parsed(false) {}
 
-  void parseHeader();
+  virtual void parseHeader();
 };

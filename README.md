@@ -82,7 +82,32 @@ Proxy-Authorization: basic aGVsbG86d29ybGQ=
 When connect request, you have to parse the port number
 to build sock
 
+# HTTP is stateless
+Refer https://developer.mozilla.org/en-US/docs/Web/HTTP/Overview for more info
 
+## GET and POST
+HTTP is stateless: there is no link between two requests being successively carried out on the same connection.
+
+The default behavior of HTTP/1.0 is to open a separate TCP connection for each HTTP request/response pair. This is less efficient than sharing a single TCP connection when multiple requests are sent in close succession.
+
+For HTTP/1.0, GET and POST usually need two seperate sock connection even if the GET and POST are connsecutive.
+For example, if we have GET request to a web and then a POST request to the same web.
+These two requests will create different sock.
+
+In order to mitigate this flaw, HTTP/1.1 introduced pipelining (which proved difficult to implement) and persistent connections: the underlying TCP connection can be partially controlled using the Connection header. 
+
+https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Connection
+The Connection general header controls whether the network connection stays open after the current transaction finishes. If the value sent is keep-alive, the connection is persistent and not closed, allowing for subsequent requests to the same server to be done.
+
+## CONNECT
+The HTTP CONNECT method starts two-way communications with the requested resource. It can be used to open a tunnel.
+
+For example, the CONNECT method can be used to access websites that use SSL (HTTPS). The client asks an HTTP Proxy server to tunnel the TCP connection to the desired destination. The server then proceeds to make the connection on behalf of the client. Once the connection has been established by the server, the Proxy server continues to proxy the TCP stream to and from the client.
+
+Connect example:
+CONNECT server.example.com:80 HTTP/1.1
+Host: server.example.com:80
+Proxy-Authorization: basic aGVsbG86d29ybGQ=
 
 
 

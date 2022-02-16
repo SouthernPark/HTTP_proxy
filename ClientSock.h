@@ -3,6 +3,7 @@
 #include <sys/socket.h>
 #include <unistd.h>
 
+#include "MyExceptions.h"
 #include "Request.h"
 #include "Utility.h"
 
@@ -18,10 +19,14 @@ class ClientSock {
   struct sockaddr_storage client_addr;  //where the ip and port stored
   socklen_t addr_size;                  //set as the size of sockaddr_storeage
 
-  ClientSock() : addr_size(sizeof client_addr) {}
+  ClientSock() : sockfd(-1), addr_size(sizeof client_addr) {}
 
   //close the sock
-  ~ClientSock() { close(sockfd); }
+  ~ClientSock() {
+    if (sockfd != -1) {
+      close(sockfd);
+    }
+  }
 
   /*
     send the mess to the client 
@@ -38,7 +43,7 @@ class ClientSock {
     int status = Utility::send_(this->sockfd, mess);
     if (status == -1) {
       std::cerr << "The mess can not be sent" << std::endl;
-      return -1;
+      throw send_exception();
     }
 
     return status;

@@ -1,39 +1,30 @@
 #include "ListenerSock.h"
-#include "ServerSock.h"
+#include "Proxy.h"
 
 int main() {
   //create the listener, start up
   ListenerSock listener;
   listener.start_up();
+  int count = 30;
+  while (count != 0) {
+    Proxy proxy;  //create a proxy
 
-  //create a client sock
-  ClientSock client;
+    //listener will accept a client connect
+    //and set the connecting sockfd in client
+    listener.accept_(proxy.client);  //throw listener exception
 
-  //listener will accept a client connect
-  //and set the connecting sockfd in client
-  int fd = listener.accept_(client);
+    //receive a request from the client
+    proxy.handleRequest();
+    std::cout << std::string(proxy.req.header.begin(), proxy.req.header.end());
+    std::cout << std::string(proxy.resp.header.begin(), proxy.resp.header.end());
 
-  if (fd == -1) {
-    std::cerr << "Can not create listerner" << std::endl;
-    return -1;
+    count--;
+    std::cout << "=======================" << count << std::endl;
   }
 
-  //receive a request from the client
-  Request req;
-  client.recv_http_request(req);
+  //std::cout << std::string(proxy.req.header.begin(), proxy.req.header.end());
+  //std::cout << std::string(proxy.req.body.begin(), proxy.req.body.end());
 
-  req.parseHeader();
-  std::cout << std::string(req.header.begin(), req.header.end());
-
-  ServerSock server(req.header_kvs["host"], "80");
-  server.buildSocket();
-  server.connect();
-  server.send_(req.header);
-  Response resp;
-  server.recv_http_response(resp);
-  std::cout << std::string(resp.header.begin(), resp.header.end());
-  std::cout << std::string(resp.body.begin(), resp.body.end());
-  //create a server sock
-  client.send_(resp.header);
-  client.send_(resp.body);
+  //std::cout << std::string(proxy.resp.header.begin(), proxy.resp.header.end());
+  //std::cout << std::string(proxy.resp.body.begin(), proxy.resp.body.end());
 }

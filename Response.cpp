@@ -11,7 +11,9 @@ void Response::parseHeader() {
   std::unique_ptr<std::vector<std::string> > res(Utility::split(header, del_CRLF));
 
   std::vector<std::string>::iterator it =
-      res->begin() + 1;  //the first line is the status line
+      res->begin();  //the first line is the status line
+  this->first_line = *it;
+  it++;
   std::string del = ": ";
   while (it != res->end()) {
     //check whether has ": "
@@ -20,6 +22,12 @@ void Response::parseHeader() {
       continue;
     }
     std::unique_ptr<std::vector<std::string> > line(Utility::split(*it, del));
+
+    if ((*line).size() < 2) {
+      it++;
+      continue;
+    }
+
     std::string key = (*line)[0];
     for (int i = 0; i < key.size(); i++) {
       key[i] = std::tolower(key[i]);

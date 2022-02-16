@@ -42,7 +42,7 @@ int ServerSock::recv_http_response(Response & resp) {
 
   if (status == -1) {
     std::cerr << "Can not recv from the server" << std::endl;
-    return -1;
+    throw recv_exception();
   }
 
   if (status == 0) {
@@ -63,6 +63,7 @@ int ServerSock::recv_http_response(Response & resp) {
   }
   else {
     //we get the content length in the header
+
     status = this->recv_rest_response(resp, std::stoi((*content_length).second));
   }
 
@@ -123,7 +124,7 @@ int ServerSock::buildSocket() {
   int sockfd = Utility::sock_(this->hostname, this->port, &(this->servinfo));
   if (sockfd == -1) {
     std::cerr << "Can not create the sock" << std::endl;
-    return -1;
+    throw sock_exception();
   }
 
   this->sockfd = sockfd;
@@ -134,7 +135,7 @@ int ServerSock::connect() {
   int status = Utility::connect_(this->sockfd, this->servinfo);
   if (status == -1) {
     std::cerr << "Can not connect to the server" << std::endl;
-    return -1;
+    throw connect_exception();
   }
 
   return status;
@@ -144,7 +145,7 @@ int ServerSock::send_(std::vector<char> & mess) {
   int status = Utility::send_(this->sockfd, mess);
   if (status == -1) {
     std::cerr << "The mess can not be sent" << std::endl;
-    return -1;
+    throw send_exception();
   }
 
   return status;

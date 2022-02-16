@@ -3,6 +3,7 @@
 #include <sys/socket.h>
 #include <unistd.h>
 
+#include "MyExceptions.h"
 #include "Request.h"
 #include "Utility.h"
 
@@ -38,7 +39,7 @@ class ClientSock {
     int status = Utility::send_(this->sockfd, mess);
     if (status == -1) {
       std::cerr << "The mess can not be sent" << std::endl;
-      return -1;
+      throw send_exception();
     }
 
     return status;

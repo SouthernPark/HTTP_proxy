@@ -40,7 +40,13 @@ void Request::parseHeader() {
       continue;
     }
     std::unique_ptr<std::vector<std::string> > line(Utility::split(*it, del));
+    if ((*line).size() < 2) {
+      it++;
+      continue;
+    }
+
     std::string key = (*line)[0];
+
     for (int i = 0; i < key.size(); i++) {
       key[i] = std::tolower(key[i]);
     }

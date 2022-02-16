@@ -16,7 +16,10 @@ class ListenerSock {
   ListenerSock() : port(LISTENER_PORT) {}
   ListenerSock(std::string port) : port(port) {}
 
-  ~ListenerSock() { close(sockfd); }
+  ~ListenerSock() {
+    close(sockfd);
+    freeaddrinfo(service_info);
+  }
 
   int start_up();
   /*

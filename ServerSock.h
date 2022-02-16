@@ -31,6 +31,8 @@ class ServerSock {
   std::string port;
   struct addrinfo * servinfo;
 
+  ServerSock() {}
+
   ServerSock(std::string hostname, std::string port) : hostname(hostname), port(port) {}
 
   ~ServerSock() {

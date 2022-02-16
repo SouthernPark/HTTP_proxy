@@ -14,7 +14,7 @@ class Request {
  public:
   std::vector<char> header;
   std::vector<char> body;
-
+  std::string port = "80";
   std::unordered_map<std::string, std::string> header_kvs;
 
   //

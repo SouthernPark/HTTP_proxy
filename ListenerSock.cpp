@@ -39,7 +39,7 @@ int ListenerSock::accept_(ClientSock & client) {
       accept(this->sockfd, (struct sockaddr *)&(client.client_addr), &(client.addr_size));
   if (new_fd == -1) {
     std::cerr << "Listener Can not accept" << std::endl;
-    return -1;
+    throw listener_exception();
   }
   client.sockfd = new_fd;
   return new_fd;

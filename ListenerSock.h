@@ -13,12 +13,16 @@ class ListenerSock {
   std::string port;  //which port you want the listener bind4
   struct addrinfo * service_info;
 
-  ListenerSock() : port(LISTENER_PORT) {}
+  ListenerSock() : sockfd(-1), port(LISTENER_PORT), service_info(NULL) {}
   ListenerSock(std::string port) : port(port) {}
 
   ~ListenerSock() {
-    close(sockfd);
-    freeaddrinfo(service_info);
+    if (sockfd != -1) {
+      close(sockfd);
+    }
+    if (service_info != NULL) {
+      freeaddrinfo(service_info);
+    }
   }
 
   int start_up();

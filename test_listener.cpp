@@ -5,8 +5,8 @@ int main() {
   //create the listener, start up
   ListenerSock listener;
   listener.start_up();
-
-  while (true) {
+  int count = 30;
+  while (count != 0) {
     Proxy proxy;  //create a proxy
 
     //listener will accept a client connect
@@ -14,7 +14,12 @@ int main() {
     listener.accept_(proxy.client);  //throw listener exception
 
     //receive a request from the client
-    proxy.handleGet();
+    proxy.handleRequest();
+    std::cout << std::string(proxy.req.header.begin(), proxy.req.header.end());
+    std::cout << std::string(proxy.resp.header.begin(), proxy.resp.header.end());
+
+    count--;
+    std::cout << "=======================" << count << std::endl;
   }
 
   //std::cout << std::string(proxy.req.header.begin(), proxy.req.header.end());

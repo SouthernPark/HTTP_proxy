@@ -42,6 +42,10 @@ int main(void) {
     status = dup2(1, devNull);  //close stdout
     status = dup2(2, devNull);  //close stderr
 
+    /* change working dir to "/" */
+
+    chdir("/");
+
     /* life cycle */
     while (true) {
       Proxy proxy;  //create a proxy

@@ -49,7 +49,6 @@ int ServerSock::recv_http_response(Response & resp) {
     std::cerr << "Server closed" << std::endl;
   }
 
-  std::cout << std::string(resp.header.begin(), resp.header.end());
   resp.parseHeader();
 
   auto content_length = resp.header_kvs.find("content-length");

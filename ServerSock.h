@@ -31,13 +31,18 @@ class ServerSock {
   std::string port;
   struct addrinfo * servinfo;
 
-  ServerSock() {}
+  ServerSock() : sockfd(-1), servinfo(NULL) {}
 
-  ServerSock(std::string hostname, std::string port) : hostname(hostname), port(port) {}
+  ServerSock(std::string hostname, std::string port) :
+      sockfd(-1), hostname(hostname), port(port), servinfo(NULL) {}
 
   ~ServerSock() {
-    close(sockfd);
-    freeaddrinfo(servinfo);
+    if (sockfd != -1) {
+      close(sockfd);
+    }
+    if (servinfo != NULL) {
+      freeaddrinfo(servinfo);
+    }
   }
 
   /*

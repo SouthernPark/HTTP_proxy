@@ -1,6 +1,6 @@
 #include "Proxy.h"
 
-void Proxy::handleRequest() {
+void Proxy::handleRequest(LRUCache & cache) {
   int status = this->client.recv_http_request(this->req);
   this->req.parseHeader();
   if (status == -1) {
@@ -9,7 +9,20 @@ void Proxy::handleRequest() {
   }
   //check the method of header
   if (this->req.request_method.compare("GET") == 0) {
+    //check LRU cache
+    Response * resp = cache.get(this->req);
+    if (resp != NULL) {
+      std::cout << "Fetched from LRU" << std::endl;
+      this->resp = *resp;
+      client.send_(this->resp.header);  //throw send exception
+      client.send_(this->resp.body);
+      return;
+    }
     this->handleGet();
+    //cache the GET request
+    std::cout << "Inside handle request function, request line is "
+              << this->req.request_line << std::endl;
+    cache.put(this->req, this->resp);
   }
   else if (this->req.request_method.compare("POST") == 0) {
     this->handlePOST();

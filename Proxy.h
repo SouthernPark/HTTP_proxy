@@ -3,6 +3,7 @@
 #define PROXY_H
 
 #include "ClientSock.h"
+#include "LRUCache.h"
 #include "Request.h"
 #include "Response.h"
 #include "ServerSock.h"
@@ -24,7 +25,7 @@ class Proxy {
     and what type fo requests it is and call for the handle*()
     func
   */
-  void handleRequest();
+  void handleRequest(LRUCache & cache);
 
   /*
     This function will handle the get request from the client sock

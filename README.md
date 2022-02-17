@@ -110,6 +110,21 @@ Host: server.example.com:80
 Proxy-Authorization: basic aGVsbG86d29ybGQ=
 
 
+## C++ use self defined object as the key of unordered map
+You have to specify another hash function class which will overload the () operator.
+Then you can put the hash function class into ordered map template <>.
+
+Also, you have to specify == operator in you self defined class in case of hash collision.
+
+In this project, I used unordered_map in the LRUCahe class, the key of the map is the Request
+and the val of the req is the response.
+
+For the same request, we may want to response the resp cached in our map.
+
+But I do not take time into consieration.
+
+
+
 
     
 

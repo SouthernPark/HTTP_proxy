@@ -140,6 +140,43 @@ Actually, GET and POST may also have format.
 
 If there is not : in the hostname, that means the defaul 80.
 
+## https
+
+CONNECT before sending GET, REQUEST and POST
+
+CONNECT request will send to the proxy which will ask the proxy set up a tunel with
+the server.
+
+Then GET, REQUEST and POST request will be followed.
+
+Once one end quit and close the connection, maybe wait a few seconds.
+The tunel will be closed.
+
+CONNECT will need multi process, the reason is that:
+once a tunel is established, it will block there waiting for client and server
+message, which means they will occupy one process.
+
+We can either design CONNECT as multi process or multi thread
+
+## issues in my muti-process implementation of request
+1. Cache was copied across each process not efficient.
+    But for CONNECT, there is no need to cache.
+
+2. Normally the framework to handle request with multi process is
+
+    Listener accept a connection from client
+
+    fork --> leads to parent process and child process
+
+        child process will firstly close listener and then do request staff
+
+        parent will close the accepted connection with client 
+
+    The problem here is:
+        If I close the listener in child process before do request staff,
+        CONNECT will not work, but pure GET and Request (http) will work fine.
+        If I do request staff then do close listener, everything works well.
+
 
 
 

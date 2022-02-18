@@ -25,4 +25,4 @@ test_utility: Utility.cpp UtilityTest.cpp
 	g++ -g -o test_utility Utility.cpp UtilityTest.cpp
 
 test_listener: Utility.cpp ClientSock.cpp ListenerSock.cpp test_listener.cpp Request.cpp Response.cpp ServerSock.cpp Proxy.cpp
-	g++ -g -o test_listener Utility.cpp ClientSock.cpp ListenerSock.cpp Request.cpp Response.cpp ServerSock.cpp Proxy.cpp LRUCache.h test_listener.cpp
+	g++ -g Utility.cpp ClientSock.cpp ListenerSock.cpp Request.cpp Response.cpp ServerSock.cpp Proxy.cpp LRUCache.h test_listener.cpp -o test_listener -lpthread

@@ -14,7 +14,7 @@
 #include <sstream>
 #include <string>
 #include <vector>
-#define BUFFER_SIZE 1000000
+#define BUFFER_SIZE 65536
 #define HOSTNAME_SIZE 100
 #define PORT_SIZE 100
 //used by send, this macro is used for sending chunked mess in Utility::send

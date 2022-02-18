@@ -65,7 +65,7 @@ int Utility::connect_(int sockfd, struct addrinfo * service_info) {
   A helper function that wil help us send all the buf 
   to fd.
 */
-int sendAll(int fd, char * buf, int * len) {
+int Utility::sendAll(int fd, char * buf, int * len) {
   int total = 0;  //how many bytes have been sent
   int bytesleft = *len;
   int n = 0;

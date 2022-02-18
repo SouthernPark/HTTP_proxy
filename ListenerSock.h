@@ -18,6 +18,7 @@ class ListenerSock {
 
   ~ListenerSock() {
     if (sockfd != -1) {
+      std::cout << "Listenered closed" << std::endl;
       close(sockfd);
     }
     if (service_info != NULL) {

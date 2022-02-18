@@ -124,6 +124,23 @@ For the same request, we may want to response the resp cached in our map.
 But I do not take time into consieration.
 
 
+## CONNECT
+CONNECT header is in the following format:
+
+CONNECT www.youtube.com:443 HTTP/1.1
+User-Agent: PostmanRuntime/7.29.0
+Accept: */*
+Accept-Encoding: gzip, deflate, br
+Connection: keep-alive
+host: www.youtube.com:443
+
+When you build server sock, you need to split www.youtube.com:443
+
+Actually, GET and POST may also have format.
+
+If there is not : in the hostname, that means the defaul 80.
+
+
 
 
     

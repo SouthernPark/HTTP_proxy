@@ -2,6 +2,8 @@
 #ifndef PROXY_H
 #define PROXY_H
 
+#include <memory>
+
 #include "ClientSock.h"
 #include "LRUCache.h"
 #include "Request.h"

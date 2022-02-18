@@ -144,3 +144,13 @@ void Proxy::handleCONNECT() {
     FD_SET(this->server.sockfd, &readfds);  //add the server sock
   }
 }
+
+//this function will check current time and
+bool expires() {
+  //1. check if have expires
+  //2. check if has cache-control and cache-control has no-cache and max-age
+}
+
+void Proxy::get_resp_from_cache_and_sent_to_client() {
+  //check expireation
+}

@@ -177,6 +177,12 @@ We can either design CONNECT as multi process or multi thread
         CONNECT will not work, but pure GET and Request (http) will work fine.
         If I do request staff then do close listener, everything works well.
 
+        
+# thread 
+C++ 11 and later version use <thread> lib, but basically the lib uses C pthread
+
+For program that uses thread lib, we need to add -lpthread at the end of compile command.
+
 
 
 

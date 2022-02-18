@@ -17,17 +17,18 @@ int main() {
     listener.accept_(proxy.client);  //throw listener exception
     if ((pid = fork()) == 0) {
       //child process
-      std::cout << "This is child process" << std::endl;
+
       //close(listener.sockfd);
+
       //listener.~ListenerSock();  //close the listener in child process
+
       proxy.handleRequest(cache);
       listener.~ListenerSock();
-      std::cout << "++++++++++++++++++++++++++++++++++++";
-      std::cout << "exit from child process" << std::endl;
+
       exit(0);  //exit parent process
     }
     //receive a request from the client
-    std::cout << "This is parent process" << std::endl;
+
     proxy.client.~ClientSock();  //close the client in parent process
   }
 

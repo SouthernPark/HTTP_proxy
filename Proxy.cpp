@@ -9,10 +9,11 @@ void Proxy::handleRequest(LRUCache & cache) {
   }
   //check the method of header
   if (this->req.request_method.compare("GET") == 0) {
+    std::cout << "GET";
     //check LRU cache
     Response * resp = cache.get(this->req);
     if (resp != NULL) {
-      std::cout << "Fetched from LRU" << std::endl;
+      // std::cout << "Fetched from LRU" << std::endl;
       this->resp = *resp;
       client.send_(this->resp.header);  //throw send exception
       client.send_(this->resp.body);
@@ -24,9 +25,11 @@ void Proxy::handleRequest(LRUCache & cache) {
     cache.put(this->req, this->resp);
   }
   else if (this->req.request_method.compare("POST") == 0) {
+    std::cout << "POST";
     this->handlePOST();
   }
   else if (this->req.request_method.compare("CONNECT") == 0) {
+    std::cout << "CONNECT";
     this->handleCONNECT();
   }
 }
@@ -84,7 +87,7 @@ void Proxy::handleCONNECT() {
   std::vector<char> connect_ok(connect_ok_str.begin(), connect_ok_str.end());
   this->client.send_(connect_ok);
 
-  std::cout << "Connection built in CONNECT" << std::endl;
+  //std::cout << "Connection built in CONNECT" << std::endl;
 
   //send header to server
 
@@ -103,7 +106,7 @@ void Proxy::handleCONNECT() {
       std::vector<char> mess;
       //recv mess from client
       int status = this->client.recv_(mess);
-      std::cout << "Received message from the client. recv: " << status << std::endl;
+      // std::cout << "Received message from the client. recv: " << status << std::endl;
       if (status == 0) {
         //client disconnected
         exit = true;  //client may still have something to send
@@ -119,7 +122,7 @@ void Proxy::handleCONNECT() {
       //server has sent you the data
       std::vector<char> mess;
       int status = this->server.recv_(mess);
-      std::cout << "Received message from the server. recv: " << status << std::endl;
+      // std::cout << "Received message from the server. recv: " << status << std::endl;
       if (status == 0) {
         exit = true;
       }

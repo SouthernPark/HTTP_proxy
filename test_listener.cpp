@@ -23,7 +23,7 @@ int main() {
   ListenerSock listener;
   listener.start_up();
   LRUCache cache(LRUCACHE_SIZE);
-  int count = 30;
+  int count = 300000;
   pid_t pid;
   while (count != 0) {
     //create proxy in the heap
@@ -35,6 +35,7 @@ int main() {
     //once there is a connection spawn a new thread to handle the request
     std::thread thread(handle_request, proxy, &cache);
     thread.detach();  //detach the child thread from the parent thread
+    count--;
   }
 
   //std::cout << std::string(proxy.req.header.begin(), proxy.req.header.end());

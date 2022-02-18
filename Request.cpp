@@ -15,22 +15,22 @@ void Request::parseHeader() {
   if (this->parsed) {
     return;
   }
+
   std::string header(this->header.begin(), this->header.end());
+  //split the header
   std::string del_CRLF = "\r\n";
-  //split the header with CRLF
-  //we get the header line by line
   std::unique_ptr<std::vector<std::string> > res(Utility::split(header, del_CRLF));
 
-  std::vector<std::string>::iterator it =
-      res->begin();  //the first line is the status line
+  /* get the first request line */
+  std::vector<std::string>::iterator it = res->begin();
 
   if (it != res->end()) {
-    //then
     this->request_line = *it;
-    //parse the request line
+
     parseRequestLine(*this);
   }
 
+  /* get the following key: value pairs */
   it++;
   std::string del = ": ";
   while (it != res->end()) {
@@ -39,22 +39,39 @@ void Request::parseHeader() {
       it++;
       continue;
     }
+    //split
     std::unique_ptr<std::vector<std::string> > line(Utility::split(*it, del));
+    //make sure there are two elements in the kv pairs
     if ((*line).size() < 2) {
       it++;
       continue;
     }
-
+    //set key
     std::string key = (*line)[0];
-
+    //key to lower case
     for (int i = 0; i < key.size(); i++) {
       key[i] = std::tolower(key[i]);
     }
     std::string val = (*line)[1];
-
+    //add key val pairs
     this->header_kvs[key] = val;
     it++;
   }
+
+  /* parse port and hostname */
+  std::string del2 = ":";
+  auto host_it = this->header_kvs.find("host");
+  if (host_it == this->header_kvs.end()) {
+    throw no_host();
+  }
+
+  std::unique_ptr<std::vector<std::string> > host_and_port(
+      Utility::split((*host_it).second, del2));
+
+  if ((*host_and_port).size() == 2) {
+    this->port = (*host_and_port)[1];
+  }
+
   this->parsed = true;
   return;
 }

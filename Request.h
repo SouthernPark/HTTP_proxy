@@ -5,6 +5,7 @@
 #include <unordered_map>
 #include <vector>
 
+#include "MyExceptions.h"
 #include "Utility.h"
 
 /*

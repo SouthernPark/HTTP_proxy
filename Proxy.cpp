@@ -146,11 +146,44 @@ void Proxy::handleCONNECT() {
 }
 
 //this function will check current time and
-bool expires() {
+bool expires(Response & resp) {
   //1. check if have expires
+
   //2. check if has cache-control and cache-control has no-cache and max-age
 }
 
-void Proxy::get_resp_from_cache_and_sent_to_client() {
+void Proxy::get_resp_from_cache_and_sent_to_client(LRUCache & cache) {
   //check expireation
+  if (cache.get(req) == NULL) {
+    handleNotCachedGet();
+  }
+}
+
+void Proxy::handleNotCachedGet(LRUCache & cache) {
+  this->req.parseHeader();
+
+  //build up the server sock
+  this->server.hostname = req.header_kvs["host"];
+  this->server.port = req.port;
+
+  server.buildSocket();  //throw sock_exception if sock can not build
+  server.connect();      //throw connect rxception if sock can not connect
+
+  //send header and body
+  server.send_(req.header);  //throw send exception
+  server.send_(req.body);
+
+  server.recv_http_response(this->resp);  //throw recv exception
+
+  //TODO: check whether response header has no-store in cache conrtol
+  resp.parseCacheControl();
+  auto no_store_it = resp.cache_control_kvs.find("no-store");
+  if (resp.response_code.compare("200") != 0 &&
+      no_store_it == resp.cache_control_kvs.end()) {
+    //we can store the resp in cache
+    cache.put(req, resp);
+  }
+
+  client.send_(resp.header);  //throw send exception
+  client.send_(resp.body);
 }

@@ -69,13 +69,28 @@ class Proxy {
                   update the LRU cache and send the cached resp and return
 
     B. no cached resp in LRU
-      get the resp from the client directly and check if have 
-
-
-    if there is no cached response:
+      get the resp from the client directly and check if have no-cache
+      
+      if there is no cached response and 200 OK:
+        cache the response.
+      
+      send the response to the user
+        
        
   */
-  void get_resp_from_cache_and_sent_to_client();
+  void get_resp_from_cache_and_sent_to_client(LRUCache & cache);
+
+  /*
+    By calling this function, you ensure that their is no cached response. 
+    This function will:
+    get the resp from the client directly and check if have no-cache
+      
+    if there is no cached response and 200 OK:
+        cache the response.
+      
+    send the response to the user
+  */
+  void handleNotCachedGet(LRUCache & cache);
 };
 
 #endif

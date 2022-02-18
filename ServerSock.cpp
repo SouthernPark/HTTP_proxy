@@ -63,9 +63,11 @@ int ServerSock::recv_http_response(Response & resp) {
   }
   else {
     //we get the content length in the header
-
     status = this->recv_rest_response(resp, std::stoi((*content_length).second));
   }
+
+  //parse the response header
+  resp.parseCacheControl();
 
   return status;
 }

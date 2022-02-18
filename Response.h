@@ -15,11 +15,16 @@ class Response {
   std::vector<char> body;
 
   std::unordered_map<std::string, std::string> header_kvs;
-
+  std::unordered_map<std::string, std::string> cache_control_kvs;
   bool parsed;
+  bool cache_parsed;
 
-  Response() : parsed(false) {}
+  std::string response_code;
 
-  virtual void parseHeader();
+  Response() : parsed(false), cache_parsed(false) {}
+
+  void parseHeader();
+
+  void parseCacheControl();
 };
 #endif

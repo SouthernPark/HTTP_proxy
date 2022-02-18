@@ -85,6 +85,23 @@ class ServerSock {
   */
   int recv_http_response(Response & resp);
 
+  /*
+    This functoin will receive mess from the server
+  */
+  int recv_(std::vector<char> & mess) {
+    int status = Utility::recv_(this->sockfd, mess);
+
+    if (status == -1) {
+      std::cerr << "Can not recv from client" << std::endl;
+      return -1;
+    }
+
+    if (status == 0) {
+      std::cout << "client disconnected (recv return 0)" << std::endl;
+    }
+    return status;
+  }
+
  private:
   /*
     This function is used when the response header has the content-length

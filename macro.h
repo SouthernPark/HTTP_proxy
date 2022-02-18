@@ -14,7 +14,7 @@
 #include <sstream>
 #include <string>
 #include <vector>
-#define BUFFER_SIZE 1000000
+#define BUFFER_SIZE 65536
 #define HOSTNAME_SIZE 100
 #define PORT_SIZE 100
 //used by send, this macro is used for sending chunked mess in Utility::send
@@ -22,8 +22,10 @@
 //used by recv, the max header size supposed by server is 48KB, here we set it to 2^16
 #define HEADER_SIZE 65536
 
-#define LISTENER_PORT "4444"
+#define LISTENER_PORT "12345"
 #define LISTENER_HOST "0.0.0.0"
 #define LISTENER_MAX_CONNECT 100
+
+#define LRUCACHE_SIZE 100
 
 #endif

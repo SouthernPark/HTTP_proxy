@@ -76,7 +76,7 @@ int ServerSock::recv_rest_response(Response & resp, int total) {
   int status = 1;
 
   //recv the bytes until the total is 0
-  while (total != 0) {
+  while (total > 0) {
     status = Utility::recv_(this->sockfd, buffer);
     if (status == -1) {
       std::cerr << "Can not recv from the client" << std::endl;

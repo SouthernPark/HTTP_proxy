@@ -57,5 +57,7 @@ class Utility {
   static int connect_(int sockfd, struct addrinfo * service_info);
 
   static std::vector<std::string> * split(std::string & input, std::string & delimiter);
+
+  static int sendAll(int fd, char * buf, int * len);
 };
 #endif

@@ -4,6 +4,7 @@
 #include <fcntl.h>
 #include <unistd.h>
 
+#include "LRUCache.h"
 #include "ListenerSock.h"
 #include "Proxy.h"
 

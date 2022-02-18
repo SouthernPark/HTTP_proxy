@@ -46,6 +46,8 @@ int main(void) {
 
     chdir("/");
 
+    LRUCache cache(LRUCACHE_SIZE);
+
     /* life cycle */
     while (true) {
       Proxy proxy;  //create a proxy
@@ -55,7 +57,7 @@ int main(void) {
       listener.accept_(proxy.client);  //throw listener exception
 
       //receive a request from the client
-      proxy.handleRequest();
+      proxy.handleRequest(cache);
     }
   }
 

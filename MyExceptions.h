@@ -29,4 +29,8 @@ class send_exception : public std::exception {
   virtual const char * what() const throw() { return "Can not send\n"; }
 };
 
+class host_port_no_find_exception : public std::exception {
+  virtual const char * what() const throw() { return "Can not get the host and port\n"; }
+};
+
 #endif

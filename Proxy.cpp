@@ -45,12 +45,12 @@ void Proxy::handleGet() {
   server.connect();      //throw connect rxception if sock can not connect
 
   //send header and body
-  server.send_(req.header);  //throw send exception
-  server.send_(req.body);
+  server.send_request(req);
 
+  //get resp from server
   server.recv_http_response(this->resp);  //throw recv exception
-  client.send_(resp.header);              //throw send exception
-  client.send_(resp.body);
+  //send resp to client
+  client.send_response(resp);  //throw send exceptio
 }
 
 void Proxy::handlePOST() {
@@ -147,15 +147,63 @@ void Proxy::handleCONNECT() {
 
 //this function will check current time and
 bool expires(Response & resp) {
-  //1. check if have expires
+  //1. check if have expires filed like Expires: Wed, 21 Oct 2015 07:28:00 GMT
+  if (true /* has expires attribute */) {
+    if (true /* expire */) {
+      return true;
+    }
+  }
 
   //2. check if has cache-control and cache-control has no-cache and max-age
+  if (true /* has no-cache */) {
+    return true;
+  }
+
+  //3. check if the client has no-cache
+  if (true /* client has no-cache */) {
+    return true;
+  }
+
+  //4. check maxage
+  if (true /* has max-age  */) {
+    if (true /* date + max-age > local time */) {
+      return true;
+    }
+  }
+
+  //if there is no cache-control header, we can think it as no cache restrictions
+  return false;
 }
 
 void Proxy::get_resp_from_cache_and_sent_to_client(LRUCache & cache) {
-  //check expireation
+  //check in cache or not
   if (cache.get(req) == NULL) {
-    handleNotCachedGet();
+    std::cout << "ID: Not in Cache" << std::endl;  //TODO: write into log later
+    handleNotCachedGet(cache);
+    return;
+  }
+
+  //check expire
+  if (!expires(resp)) {
+    //not expire
+    std::cout << "ID: in cache, valid" << std::endl;
+    //send the cached response to the client
+    client.send_response(resp);
+  }
+  else {
+    //expired
+
+    //check if must-revalidation in cache control or not
+    if (true /* must cache in cache control */) {
+      std::cout << "ID: in cache, requires validation" << std::endl;
+
+      //TODO: write method to handle revalidate
+    }
+    else {
+      //we can just view the response as expired
+      std::cout << "ID: in cache, but expired at EXPIREDTIME" << std::endl;
+      handleNotCachedGet(cache);
+    }
   }
 }
 
@@ -170,9 +218,9 @@ void Proxy::handleNotCachedGet(LRUCache & cache) {
   server.connect();      //throw connect rxception if sock can not connect
 
   //send header and body
-  server.send_(req.header);  //throw send exception
-  server.send_(req.body);
+  server.send_request(req);  //may throw send exception
 
+  //recv response from server
   server.recv_http_response(this->resp);  //throw recv exception
 
   //TODO: check whether response header has no-store in cache conrtol
@@ -184,6 +232,5 @@ void Proxy::handleNotCachedGet(LRUCache & cache) {
     cache.put(req, resp);
   }
 
-  client.send_(resp.header);  //throw send exception
-  client.send_(resp.body);
+  client.send_response(resp);  //may throw send exception
 }

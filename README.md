@@ -184,6 +184,12 @@ C++ 11 and later version use <thread> lib, but basically the lib uses C pthread
 For program that uses thread lib, we need to add -lpthread at the end of compile command.
 
 
+# revalidation
+
+Because the server may respond differently. For example, you have an expired cached response and it has "must-revalidate" field in its header. This response is quite large (you can imagine 1GB). If you send the request to server and the server gives back a 304 response (which is quite small), it saves a lot. Now you have another expired cached response and it does not require revalidation, you can simply print  "ID: in cache, but expired at EXPIREDTIME" and then treat it as a new request.
+
+
+
 
 
     

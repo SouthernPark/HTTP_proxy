@@ -177,3 +177,8 @@ void ServerSock::parse_trailer(Response & resp) {
     }
   }
 }
+
+void ServerSock::send_request(Request & req) {
+  this->send_(req.header);  //throw send exception
+  this->send_(req.body);
+}

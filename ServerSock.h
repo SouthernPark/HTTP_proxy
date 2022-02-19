@@ -5,6 +5,7 @@
 #include <string>
 
 #include "MyExceptions.h"
+#include "Request.h"
 #include "Response.h"
 #include "macro.h"
 /*
@@ -101,6 +102,8 @@ class ServerSock {
     }
     return status;
   }
+
+  void send_request(Request & req);
 
  private:
   /*

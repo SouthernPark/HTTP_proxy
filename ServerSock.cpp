@@ -38,8 +38,6 @@ int ServerSock::recv_response_header(Response & resp) {
 }
 
 int ServerSock::recv_http_response(Response & resp) {
-  resp.header.clear();  //this function relies on the header and body is empty
-  resp.body.clear();
   int status = recv_response_header(resp);
 
   if (status == -1) {

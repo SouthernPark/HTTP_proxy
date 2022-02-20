@@ -9,7 +9,11 @@ void Response::parseHeader() {
   //split the header with CRLF
   //we get the header line by line
   std::unique_ptr<std::vector<std::string> > res(Utility::split(header, del_CRLF));
-
+  if (res->size() == 0) {
+    std::cout << std::string(header.begin(), header.end());
+    std::cout << "AAAAAAAAAAAAAAAAAAAAAAAAAAA" << std::endl;
+    return;
+  }
   std::vector<std::string>::iterator it =
       res->begin();  //the first line is the status line
   if (it != res->end()) {

@@ -1,18 +1,19 @@
 #include "Proxy.h"
 
 void Proxy::handleRequest(LRUCache & cache) {
+  //recv the request header and body if there is
   int status = this->client.recv_http_request(this->req);
-  this->req.parseHeader();
   if (status == -1) {
     std::cerr << "HandleGet in Proxy.cpp can not recv" << std::endl;
     throw recv_exception();
   }
+  //parse the request header
+  this->req.parseHeader();
+
   //check the method of header
   if (this->req.request_method.compare("GET") == 0) {
     get_resp_from_cache_and_sent_to_client(cache);
     //cache the GET request
-
-    cache.put(this->req, this->resp);
   }
   else if (this->req.request_method.compare("POST") == 0) {
     std::cout << "POST";
@@ -139,10 +140,17 @@ void Proxy::handleCONNECT() {
 bool expires(Response & resp, Request & req) {
   //1. check if have expires filed like Expires: Wed, 21 Oct 2015 07:28:00 GMT
   auto expires_it = resp.header_kvs.find("expires");
-  if (expires_it != resp.header_kvs.end() /* has expires attribute */) {
+  if (expires_it != resp.header_kvs.end()) {
+    //expires can be -1 or 0
+    if ((*expires_it).second.size() <= 5) {
+      return true;
+    }
+
+    std::cout << "http_date in test1: " << expires_it->second << std::endl;
     std::time_t resp_expire_date = Utility::http_date_str_to_gmt(expires_it->second);
     std::time_t now = Utility::get_current_time_gmt();
     if (now > resp_expire_date) {
+      std::cout << "Now is beyong the expireation time" << std::endl;
       return true;
     }
   }
@@ -150,8 +158,9 @@ bool expires(Response & resp, Request & req) {
   //2. check if the req resp has no-cache (which means the client or server always want to revalidate)
   auto req_no_cache = req.cache_control_kvs.find("no-cache");
   auto resp_no_cache = resp.cache_control_kvs.find("no-cache");
-  if (req_no_cache == req.cache_control_kvs.end() ||
-      resp_no_cache == resp.cache_control_kvs.end()) {
+  if (req_no_cache != req.cache_control_kvs.end() ||
+      resp_no_cache != resp.cache_control_kvs.end()) {
+    std::cout << "No-cache" << std::endl;
     return true;
   }
 
@@ -166,12 +175,20 @@ bool expires(Response & resp, Request & req) {
       return true;
     }
     //convert http date string to time_t in gmt/utc
+    std::cout << "http_date in test2 is: " << http_date->second << std::endl;
     auto http_time = Utility::http_date_str_to_gmt(http_date->second);
     //convert max_age str to integer
     int max_age = std::stoi(resp_max_age->second);
     //get current time
     auto now = Utility::get_current_time_gmt();
-    if (http_time + max_age > now /* date + max-age > local time */) {
+    if (http_time + max_age < now /* date + max-age < local time */) {
+      std::cout << "The http date in header is: " << http_date->second
+                << ". The timestamp is: " << http_time << std::endl;
+
+      std::cout << "Current time stamp is: " << now << std::endl;
+
+      std::cout << "Beyong the max-age" << std::endl;
+
       return true;
     }
   }
@@ -181,8 +198,8 @@ bool expires(Response & resp, Request & req) {
 }
 
 void Proxy::get_resp_from_cache_and_sent_to_client(LRUCache & cache) {
-  req.parseHeader();
-  req.parseCacheControl();
+  // req.parseHeader();
+  // req.parseCacheControl();
   //check in cache or not
   Response * cached_resp = cache.get(req);
   if (cached_resp == NULL) {
@@ -193,40 +210,44 @@ void Proxy::get_resp_from_cache_and_sent_to_client(LRUCache & cache) {
   }
 
   //in cache
-  this->resp = *cached_resp;
-  std::cout << "Head size: " << resp.header.size() << std::endl;
-  std::cout << "Body size: " << resp.body.size() << std::endl;
-  resp.parseHeader();
-  resp.parseHeader();
+  // this->resp = *cached_resp;
+  // std::cout << "----------------------------------------------" << std::endl;
+  // std::cout << std::string(resp.header.begin(), resp.header.end());
+  // std::cout << std::string(resp.body.begin(), resp.body.end());
+  // std::cout << "In cache resp size: " << resp.body.size() << std::endl;
+  // std::cout << "Head size: " << resp.header.size() << std::endl;
+  // std::cout << "Body size: " << resp.body.size() << std::endl;
+  cached_resp->parseHeader();
 
   //check expire
-  if (!expires(resp, req)) {
+  if (!expires(*cached_resp, this->req)) {
     //not expire
     //check if have must-revalidate in cache-control
     auto must_reval_it_req = req.cache_control_kvs.find("must-revalidate");
-    auto must_reval_it_resp = resp.cache_control_kvs.find("must-revalidate");
+    auto must_reval_it_resp = cached_resp->cache_control_kvs.find("must-revalidate");
     if (must_reval_it_req != req.cache_control_kvs.end() ||
-        must_reval_it_resp != resp.cache_control_kvs.end()) {
+        must_reval_it_resp != cached_resp->cache_control_kvs.end()) {
       std::cout << "ID: in cache, requires validation" << std::endl;
       handleRevalidate(cache);
     }
     else {
       std::cout << "ID: in cache, valid" << std::endl;
+
       //send the cached response to the client
-      client.send_response(resp);
+
+      std::cout << "In cache resp size: " << resp.body.size() << std::endl;
+      client.send_response(*cached_resp);
     }
   }
   else {
     //expired needs revalidate
-
-    //we can just view the response as expired
     std::cout << "ID: in cache, but expired at EXPIREDTIME" << std::endl;
-    handleNotCachedGet(cache);
+    handleRevalidate(cache);
   }
 }
 
 void Proxy::handleNotCachedGet(LRUCache & cache) {
-  this->req.parseHeader();
+  // this->req.parseHeader();
 
   //build up the server sock
   this->server.hostname = req.header_kvs["host"];
@@ -235,28 +256,39 @@ void Proxy::handleNotCachedGet(LRUCache & cache) {
   server.buildSocket();  //throw sock_exception if sock can not build
   server.connect();      //throw connect rxception if sock can not connect
 
+  std::cout << "Connected" << std::endl;
+
   //send header and body
   server.send_request(req);  //may throw send exception
+  std::cout << "test1" << std::endl;
 
   //recv response from server
   server.recv_http_response(this->resp);  //throw recv exception
-
+  std::cout << "test2" << std::endl;
   //std::cout << std::string(resp.header.begin(), resp.header.end()) << std::endl;
 
   //TODO: check whether response header has no-store in cache conrtol
-  resp.parseHeader();
-  resp.parseCacheControl();
+  // resp.parseHeader();
+  // resp.parseCacheControl();
   auto no_store_it = resp.cache_control_kvs.find("no-store");
 
   //std::cout << std::string(resp.body.begin(), resp.body.begin() + 500) << std::endl;
   if (resp.response_code.compare("200") == 0 &&
       no_store_it == resp.cache_control_kvs.end()) {
-    //we can store the resp in cache
-    cache.put(req, resp);
-    std::cout << "Cached in handleNotCachedGet function" << std::endl;
+    //update the cache
+    std::cout << "Status == 200 and no no-store, can sotre in the cache" << std::endl;
+    cache.put(this->req, this->resp);
+    client.send_response(resp);
+    //std::cout << "Cached in handleNotCachedGet function" << std::endl;
+  }
+  else {
+    std::cout << std::string(resp.header.begin(), resp.header.end()) << std::endl;
+    std::cout << "status != 200 or no-store in the cache, does not store in the cache"
+              << std::endl;
+    client.send_response(resp);  //may throw send exception
   }
   // std::cout << std::string(resp.body.begin(), resp.body.end()) << std::endl;
-  client.send_response(resp);  //may throw send exception
+  std::cout << "test3" << std::endl;
 }
 
 /*
@@ -273,10 +305,18 @@ void Proxy::handleNotCachedGet(LRUCache & cache) {
       5. send the the resp in the cache to client
   */
 void Proxy::handleRevalidate(LRUCache & cache) {
+  //build up the server sock
+  this->server.hostname = req.header_kvs["host"];
+  this->server.port = req.port;
+
+  server.buildSocket();  //throw sock_exception if sock can not build
+  server.connect();      //throw connect rxception if sock can not connect
+
   std::vector<char> reval_header = makeRevalidateHeader();
   server.send_(reval_header);
   Response reval_resp;
   server.recv_http_response(reval_resp);
+
   reval_resp.parseHeader();
 
   if (reval_resp.response_code.compare("304") == 0) {
@@ -287,8 +327,12 @@ void Proxy::handleRevalidate(LRUCache & cache) {
     std::cout << "Revalidation: server response 200 updated" << std::endl;
     //update the resp in the cache
     cache.put(req, reval_resp);
+    std::cout << "Cached size resp header: " << cache.get(req)->header.size()
+              << std::endl;
+    std::cout << "Cached size resp body: " << cache.get(req)->body.size() << std::endl;
   }
   else {
+    std::cout << "Revalidate other tha 304 or 200" << std::endl;
     handleNotCachedGet(cache);
   }
 
@@ -298,6 +342,8 @@ void Proxy::handleRevalidate(LRUCache & cache) {
     throw no_resp_cache();
   }
   client.send_response(*cached_resp);
+  std::cout << "Cached size resp header: " << cache.get(req)->header.size() << std::endl;
+  std::cout << "Cached size resp body: " << cache.get(req)->body.size() << std::endl;
   return;
 }
 

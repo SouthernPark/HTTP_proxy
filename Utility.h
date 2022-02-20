@@ -69,6 +69,8 @@ class Utility {
 
     return type: time_t is a long int which represents how many seconds
     from now to 1970/01/01 
+
+    use https://www.epochconverter.com/ to test
   */
   static std::time_t get_current_time_gmt();
 

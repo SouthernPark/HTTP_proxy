@@ -9,7 +9,7 @@ int main() {
   LRUCache cache(LRUCACHE_SIZE);
   int count = 30;
   while (count != 0) {
-    Proxy proxy;  //create a proxy
+    Proxy proxy{};  //create a proxy
 
     //listener will accept a client connect
     //and set the connecting sockfd in client

@@ -24,11 +24,16 @@ class Request {
   std::string request_url;
   std::string protocol;
 
+  std::unordered_map<std::string, std::string> cache_control_kvs;
+  bool cache_parsed;
+
   bool parsed;
 
   Request() : parsed(false) {}
 
   void parseHeader();
+
+  void parseCacheControl();
 
   //equal operator
   bool operator==(const Request & rhs) const {

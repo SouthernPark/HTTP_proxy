@@ -9,17 +9,7 @@ void Proxy::handleRequest(LRUCache & cache) {
   }
   //check the method of header
   if (this->req.request_method.compare("GET") == 0) {
-    std::cout << "GET";
-    //check LRU cache
-    Response * resp = cache.get(this->req);
-    if (resp != NULL) {
-      // std::cout << "Fetched from LRU" << std::endl;
-      this->resp = *resp;
-      client.send_(this->resp.header);  //throw send exception
-      client.send_(this->resp.body);
-      return;
-    }
-    this->handleGet();
+    get_resp_from_cache_and_sent_to_client(cache);
     //cache the GET request
 
     cache.put(this->req, this->resp);
@@ -146,64 +136,92 @@ void Proxy::handleCONNECT() {
 }
 
 //this function will check current time and
-bool expires(Response & resp) {
+bool expires(Response & resp, Request & req) {
   //1. check if have expires filed like Expires: Wed, 21 Oct 2015 07:28:00 GMT
-  if (true /* has expires attribute */) {
-    if (true /* expire */) {
+  auto expires_it = resp.header_kvs.find("expires");
+  if (expires_it != resp.header_kvs.end() /* has expires attribute */) {
+    std::time_t resp_expire_date = Utility::http_date_str_to_gmt(expires_it->second);
+    std::time_t now = Utility::get_current_time_gmt();
+    if (now > resp_expire_date) {
       return true;
     }
   }
 
-  //2. check if has cache-control and cache-control has no-cache and max-age
-  if (true /* has no-cache */) {
+  //2. check if the req resp has no-cache (which means the client or server always want to revalidate)
+  auto req_no_cache = req.cache_control_kvs.find("no-cache");
+  auto resp_no_cache = resp.cache_control_kvs.find("no-cache");
+  if (req_no_cache == req.cache_control_kvs.end() ||
+      resp_no_cache == resp.cache_control_kvs.end()) {
     return true;
   }
 
-  //3. check if the client has no-cache
-  if (true /* client has no-cache */) {
-    return true;
-  }
-
-  //4. check maxage
-  if (true /* has max-age  */) {
-    if (true /* date + max-age > local time */) {
+  //3. check if has max-age
+  auto resp_max_age = resp.cache_control_kvs.find("max-age");
+  if (resp_max_age != resp.cache_control_kvs.end()) {
+    //get the http date
+    auto http_date = resp.header_kvs.find("date");
+    if (http_date == resp.header_kvs.end()) {
+      //no date
+      std::cerr << "There is no date in http resp" << std::endl;
+      return true;
+    }
+    //convert http date string to time_t in gmt/utc
+    auto http_time = Utility::http_date_str_to_gmt(http_date->second);
+    //convert max_age str to integer
+    int max_age = std::stoi(resp_max_age->second);
+    //get current time
+    auto now = Utility::get_current_time_gmt();
+    if (http_time + max_age > now /* date + max-age > local time */) {
       return true;
     }
   }
 
-  //if there is no cache-control header, we can think it as no cache restrictions
+  //4.if there is no cache-control header, we can think it as no cache restrictions
   return false;
 }
 
 void Proxy::get_resp_from_cache_and_sent_to_client(LRUCache & cache) {
+  req.parseHeader();
+  req.parseCacheControl();
   //check in cache or not
-  if (cache.get(req) == NULL) {
+  Response * cached_resp = cache.get(req);
+  if (cached_resp == NULL) {
+    // not in cache
     std::cout << "ID: Not in Cache" << std::endl;  //TODO: write into log later
     handleNotCachedGet(cache);
     return;
   }
 
+  //in cache
+  this->resp = *cached_resp;
+  std::cout << "Head size: " << resp.header.size() << std::endl;
+  std::cout << "Body size: " << resp.body.size() << std::endl;
+  resp.parseHeader();
+  resp.parseHeader();
+
   //check expire
-  if (!expires(resp)) {
+  if (!expires(resp, req)) {
     //not expire
-    std::cout << "ID: in cache, valid" << std::endl;
-    //send the cached response to the client
-    client.send_response(resp);
-  }
-  else {
-    //expired
-
-    //check if must-revalidation in cache control or not
-    if (true /* must cache in cache control */) {
+    //check if have must-revalidate in cache-control
+    auto must_reval_it_req = req.cache_control_kvs.find("must-revalidate");
+    auto must_reval_it_resp = resp.cache_control_kvs.find("must-revalidate");
+    if (must_reval_it_req != req.cache_control_kvs.end() ||
+        must_reval_it_resp != resp.cache_control_kvs.end()) {
       std::cout << "ID: in cache, requires validation" << std::endl;
-
-      //TODO: write method to handle revalidate
+      handleRevalidate(cache);
     }
     else {
-      //we can just view the response as expired
-      std::cout << "ID: in cache, but expired at EXPIREDTIME" << std::endl;
-      handleNotCachedGet(cache);
+      std::cout << "ID: in cache, valid" << std::endl;
+      //send the cached response to the client
+      client.send_response(resp);
     }
+  }
+  else {
+    //expired needs revalidate
+
+    //we can just view the response as expired
+    std::cout << "ID: in cache, but expired at EXPIREDTIME" << std::endl;
+    handleNotCachedGet(cache);
   }
 }
 
@@ -223,14 +241,98 @@ void Proxy::handleNotCachedGet(LRUCache & cache) {
   //recv response from server
   server.recv_http_response(this->resp);  //throw recv exception
 
+  //std::cout << std::string(resp.header.begin(), resp.header.end()) << std::endl;
+
   //TODO: check whether response header has no-store in cache conrtol
+  resp.parseHeader();
   resp.parseCacheControl();
   auto no_store_it = resp.cache_control_kvs.find("no-store");
-  if (resp.response_code.compare("200") != 0 &&
+
+  //std::cout << std::string(resp.body.begin(), resp.body.begin() + 500) << std::endl;
+  if (resp.response_code.compare("200") == 0 &&
       no_store_it == resp.cache_control_kvs.end()) {
     //we can store the resp in cache
     cache.put(req, resp);
+    std::cout << "Cached in handleNotCachedGet function" << std::endl;
+  }
+  // std::cout << std::string(resp.body.begin(), resp.body.end()) << std::endl;
+  client.send_response(resp);  //may throw send exception
+}
+
+/*
+    This function will:
+      1. add E-tag to the req header if there is any
+      2. add last-modified to the req header if there is any
+
+      3. send the req to server 
+      4. check response 
+        a. 200 OK ?
+            update the resp in the cache
+        b. 304 not modified ?
+            //do nothing about the cache
+      5. send the the resp in the cache to client
+  */
+void Proxy::handleRevalidate(LRUCache & cache) {
+  std::vector<char> reval_header = makeRevalidateHeader();
+  server.send_(reval_header);
+  Response reval_resp;
+  server.recv_http_response(reval_resp);
+  reval_resp.parseHeader();
+
+  if (reval_resp.response_code.compare("304") == 0) {
+    //not modified
+    std::cout << "Revalidation: server response 304 not modified" << std::endl;
+  }
+  else if (reval_resp.response_code.compare("200") == 0) {
+    std::cout << "Revalidation: server response 200 updated" << std::endl;
+    //update the resp in the cache
+    cache.put(req, reval_resp);
+  }
+  else {
+    handleNotCachedGet(cache);
   }
 
-  client.send_response(resp);  //may throw send exception
+  //send the resp in the cache to client
+  Response * cached_resp = cache.get(req);
+  if (cached_resp == NULL) {
+    throw no_resp_cache();
+  }
+  client.send_response(*cached_resp);
+  return;
+}
+
+std::vector<char> Proxy::makeRevalidateHeader() {
+  //1. get the req header
+  std::vector<char> header = req.header;  //assignment operator
+
+  //remove \r\n at the end
+  header.erase(header.end() - 2, header.end());
+
+  //2. insert Etag or last-modified to the header end
+  auto etag_it = resp.header_kvs.find("etag");
+  std::string etag = "ETag: ";
+  if (etag_it != resp.header_kvs.end()) {
+    header.insert(header.end(), etag.begin(), etag.end());
+    header.insert(header.end(), (etag_it->second).begin(), (etag_it->second).end());
+    header.push_back('\r');
+    header.push_back('\n');
+  }
+
+  //3. insert last-modified to the header
+  std::string last_modified = "Last-Modified: ";
+  auto last_modified_it = resp.header_kvs.find("last-modified");
+  if (last_modified_it != resp.header_kvs.end()) {
+    header.insert(header.end(), last_modified.begin(), last_modified.end());
+    header.insert(header.end(),
+                  (last_modified_it->second).begin(),
+                  (last_modified_it->second).end());
+    header.push_back('\r');
+    header.push_back('\n');
+  }
+
+  //add \r\n at the end
+  header.push_back('\r');
+  header.push_back('\n');
+
+  return header;
 }

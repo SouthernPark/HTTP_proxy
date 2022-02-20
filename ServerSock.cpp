@@ -38,6 +38,8 @@ int ServerSock::recv_response_header(Response & resp) {
 }
 
 int ServerSock::recv_http_response(Response & resp) {
+  resp.header.clear();  //this function relies on the header and body is empty
+  resp.body.clear();
   int status = recv_response_header(resp);
 
   if (status == -1) {
@@ -63,6 +65,7 @@ int ServerSock::recv_http_response(Response & resp) {
   }
   else {
     //we get the content length in the header
+    //std::cout << "The content length is: " << (*content_length).second << std::endl;
     status = this->recv_rest_response(resp, std::stoi((*content_length).second));
   }
 

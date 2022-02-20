@@ -173,3 +173,45 @@ std::vector<std::string> * Utility::split(std::string & input, std::string & del
 
   return res;
 }
+
+std::time_t Utility::get_current_time_gmt() {
+  //get current local time with crono
+  auto curr = std::chrono::system_clock::now();
+
+  //convert to time_t
+  time_t curr_time_t = std::chrono::system_clock::to_time_t(curr);
+  //get the gmt time of tm type
+  struct tm * ptm = gmtime(&curr_time_t);
+  //convert to time_t type
+  time_t curr_time_gmt = std::mktime(ptm);
+
+  return curr_time_gmt;
+}
+
+/*
+
+  Mon, 14 Feb 2022 21:06:11 GMT
+  %a, %d %b %Y %H:%M:%S GMT
+
+  21:06:11
+  "%H:%M:%S"
+*/
+std::time_t Utility::http_date_str_to_gmt(std::string http_date) {
+  std::tm t = {};
+  std::istringstream ss(http_date);
+
+  //ss.imbue(std::locale("de_DE.utf-8"));
+
+  ss >> std::get_time(&t, "%a, %d %b %Y %H:%M:%S GMT");
+  if (ss.fail()) {
+    std::cout << "failed to get http date" << std::endl;
+  }
+
+  //http date in local time zone
+  //ex: 14 Feb 2022 21:06:11 GMT to 14 Feb 2022 21:06:11 EST
+  std::time_t local_date = std::mktime(&t);
+
+  std::time_t gmt_date = local_date + EST_TIME_ZONE * 3600;
+
+  return gmt_date;
+}

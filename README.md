@@ -188,6 +188,13 @@ For program that uses thread lib, we need to add -lpthread at the end of compile
 
 Because the server may respond differently. For example, you have an expired cached response and it has "must-revalidate" field in its header. This response is quite large (you can imagine 1GB). If you send the request to server and the server gives back a 304 response (which is quite small), it saves a lot. Now you have another expired cached response and it does not require revalidation, you can simply print  "ID: in cache, but expired at EXPIREDTIME" and then treat it as a new request.
 
+For re-validation, the proxy SHOULD send send both Last-Modified and ETag if it has both. It MUST send the ETag if it has that. If there's no ETag, then just send the Last-Modified field.
+
+If the response has neither (which may be rare), just send the whole HTTP request to the server and ignore the step of revalidation. 
+
+
+If there is no Cache-Control or at least the request does not ask you not to use cached data, you can always use cached data if any. You may care about "max-age", "max-stale", "min-fresh", "no-cache", "no-store" and "must-revalidate".
+
 
 
 

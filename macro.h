@@ -28,4 +28,6 @@
 
 #define LRUCACHE_SIZE 100
 
+#define EST_TIME_ZONE 5
+
 #endif

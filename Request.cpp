@@ -48,10 +48,8 @@ void Request::parseHeader() {
     }
     //set key
     std::string key = (*line)[0];
-    //key to lower case
-    for (int i = 0; i < key.size(); i++) {
-      key[i] = std::tolower(key[i]);
-    }
+    Utility::str_to_lowercase(key);
+
     std::string val = (*line)[1];
     //add key val pairs
     this->header_kvs[key] = val;
@@ -73,5 +71,47 @@ void Request::parseHeader() {
   }
 
   this->parsed = true;
+  parseCacheControl();
   return;
+}
+
+void Request::parseCacheControl() {
+  if (cache_parsed) {
+    return;
+  }
+  parseHeader();
+
+  //get cache control
+  auto cache_control_it = header_kvs.find("cache-control");
+
+  if (cache_control_it == header_kvs.end()) {
+    //no cache_control
+    return;
+  }
+
+  //split using comma
+  std::string del = ", ";
+  std::unique_ptr<std::vector<std::string> > splits(
+      Utility::split((*cache_control_it).second, del));
+
+  //for each element in the vector, split useing ":"
+  std::string del2 = "=";
+  auto it = (*splits).begin();
+  while (it != (*splits).end()) {
+    std::unique_ptr<std::vector<std::string> > kvs(Utility::split((*it), del2));
+    if ((*kvs).size() < 1) {
+      continue;
+    }
+    std::string key = (*kvs)[0];
+    Utility::str_to_lowercase(key);
+    if ((*kvs).size() == 1) {
+      cache_control_kvs[key] = "";
+    }
+    if ((*kvs).size() == 2) {
+      cache_control_kvs[key] = (*kvs)[1];
+    }
+    it++;
+  }
+
+  cache_parsed = true;
 }

@@ -31,6 +31,7 @@ void Response::parseHeader() {
   std::string del = ": ";
   while (it != res->end()) {
     //check whether has ": "
+
     if ((*it).find(del) == -1) {
       it++;
       continue;
@@ -43,6 +44,8 @@ void Response::parseHeader() {
     }
 
     std::string key = (*line)[0];
+    Utility::str_to_lowercase(key);
+
     for (int i = 0; i < key.size(); i++) {
       key[i] = std::tolower(key[i]);
     }
@@ -51,7 +54,9 @@ void Response::parseHeader() {
     this->header_kvs[key] = val;
     it++;
   }
+
   this->parsed = true;
+  parseCacheControl();
   return;
 }
 
@@ -90,11 +95,17 @@ void Response::parseCacheControl() {
   auto it = (*splits).begin();
   while (it != (*splits).end()) {
     std::unique_ptr<std::vector<std::string> > kvs(Utility::split((*it), del2));
+    if ((*kvs).size() < 1) {
+      continue;
+    }
+    std::string key = (*kvs)[0];
+    Utility::str_to_lowercase(key);
+    //set key to lower case
     if ((*kvs).size() == 1) {
-      cache_control_kvs[(*kvs)[0]] = "";
+      cache_control_kvs[key] = "";
     }
     if ((*kvs).size() == 2) {
-      cache_control_kvs[(*kvs)[0]] = (*kvs)[1];
+      cache_control_kvs[key] = (*kvs)[1];
     }
     it++;
   }

@@ -91,6 +91,29 @@ class Proxy {
     send the response to the user
   */
   void handleNotCachedGet(LRUCache & cache);
+
+  /*
+    This function will:
+      1. add E-tag to the req header if there is any
+      2. add last-modified to the req header if there is any
+
+      3. send the req to server 
+      4. check response 
+        a. 200 OK ?
+            update the resp in the cache
+        b. 304 not modified ?
+            //do nothing about the cache
+      5. send the the resp in the cache to client
+  */
+  void handleRevalidate(LRUCache & cache);
+
+  /*
+    helper function that will 
+      1. add E-tag to the req header if there is any
+      2. add last-modified to the req header if there is any
+  */
+
+  std::vector<char> makeRevalidateHeader();
 };
 
 #endif

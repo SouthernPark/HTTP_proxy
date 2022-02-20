@@ -1,6 +1,9 @@
 #ifndef UTILITY_H
 #define UTILITY_H
 
+#include <chrono>
+#include <iomanip>
+
 #include "macro.h"
 
 class Utility {
@@ -59,5 +62,26 @@ class Utility {
   static std::vector<std::string> * split(std::string & input, std::string & delimiter);
 
   static int sendAll(int fd, char * buf, int * len);
+
+  /*
+    This function will get the current time in gmt time zone 
+    (or we say utc time zone or http time zone)
+
+    return type: time_t is a long int which represents how many seconds
+    from now to 1970/01/01 
+  */
+  static std::time_t get_current_time_gmt();
+
+  /*
+    The format of the http data is:
+    Mon, 14 Feb 2022 21:06:11 GMT
+  */
+  static std::time_t http_date_str_to_gmt(std::string http_date);
+
+  static void str_to_lowercase(std::string & str) {
+    for (int i = 0; i < str.size(); i++) {
+      str[i] = std::tolower(str[i]);
+    }
+  }
 };
 #endif

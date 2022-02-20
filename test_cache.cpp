@@ -17,7 +17,7 @@ int main() {
 
     //receive a request from the client
     proxy.handleRequest(cache);
-    std::cout << std::string(proxy.req.header.begin(), proxy.req.header.end());
+    //std::cout << std::string(proxy.req.header.begin(), proxy.req.header.end());
     //std::cout << std::string(proxy.resp.header.begin(), proxy.resp.header.end());
 
     //std::cout << std::string(proxy.resp.body.begin(), proxy.resp.body.end());
@@ -25,14 +25,14 @@ int main() {
     //std::cout << proxy.resp.header.size() + proxy.resp.body.size() << std::endl;
     //std::cout << "header size: " << proxy.resp.header.size() << std::endl;
     auto it = proxy.resp.cache_control_kvs.begin();
-    while (it != proxy.resp.cache_control_kvs.end()) {
-      std::cout << "key: " << (*it).first << std::endl;
-      std::cout << "value: " << (*it).second << std::endl;
+    // while (it != proxy.resp.cache_control_kvs.end()) {
+    //   std::cout << "key: " << (*it).first << std::endl;
+    //   std::cout << "value: " << (*it).second << std::endl;
 
-      it++;
-    }
-    std::cout << proxy.resp.header_kvs["etag"] << std::endl;
-    std::cout << proxy.resp.response_code << std::endl;
+    //   it++;
+    // }
+    // std::cout << proxy.resp.header_kvs["etag"] << std::endl;
+    // std::cout << proxy.resp.response_code << std::endl;
 
     count--;
     std::cout << "=======================" << count << std::endl;

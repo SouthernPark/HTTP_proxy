@@ -9,11 +9,9 @@
 #include "Request.h"
 #include "Response.h"
 #include "ServerSock.h"
+#include "logger.h"
 
 class Proxy {
-  /*
-
-  */
  public:
   ServerSock server;
   ClientSock client;
@@ -27,7 +25,7 @@ class Proxy {
     and what type fo requests it is and call for the handle*()
     func
   */
-  void handleRequest(LRUCache & cache);
+  void handleRequest(LRUCache & cache, logger & log, long request_id);
 
   /*
     This function will handle the get request from the client sock
@@ -37,9 +35,9 @@ class Proxy {
     PS:: latter we will add cache to GET
   */
 
-  void handleGet();
-  void handlePOST();
-  void handleCONNECT();
+  void handleGet(long request_id, logger & req_log);
+  void handlePOST(long request_id, logger & req_log);
+  void handleCONNECT(long request_id, logger & req_log);
 
   /*
     This function will use the request header to find the response
@@ -78,7 +76,9 @@ class Proxy {
         
        
   */
-  void get_resp_from_cache_and_sent_to_client(LRUCache & cache);
+  void get_resp_from_cache_and_sent_to_client(LRUCache & cache,
+                                              logger & req_log,
+                                              long request_id);
 
   /*
     By calling this function, you ensure that their is no cached response. 
@@ -90,7 +90,7 @@ class Proxy {
       
     send the response to the user
   */
-  void handleNotCachedGet(LRUCache & cache);
+  void handleNotCachedGet(LRUCache & cache, logger & req_log, long request_id);
 
   /*
     This function will:
@@ -105,7 +105,7 @@ class Proxy {
             //do nothing about the cache
       5. send the the resp in the cache to client
   */
-  void handleRevalidate(LRUCache & cache);
+  void handleRevalidate(LRUCache & cache, logger & log, long request_id);
 
   /*
     helper function that will 

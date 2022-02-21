@@ -1,8 +1,9 @@
 #include "Proxy.h"
 
-void Proxy::handleRequest(LRUCache & cache) {
+void Proxy::handleRequest(LRUCache & cache, logger & req_log, long request_id) {
   //recv the request header and body if there is
   int status = this->client.recv_http_request(this->req);
+  req_log.log_new_request(request_id, req, client.sockfd);
   if (status == -1) {
     std::cerr << "HandleGet in Proxy.cpp can not recv" << std::endl;
     throw recv_exception();
@@ -12,20 +13,23 @@ void Proxy::handleRequest(LRUCache & cache) {
 
   //check the method of header
   if (this->req.request_method.compare("GET") == 0) {
-    get_resp_from_cache_and_sent_to_client(cache);
-    //cache the GET request
+    //lock the cache for one request
+    cache.mtx.lock();
+    get_resp_from_cache_and_sent_to_client(cache, req_log, request_id);
+    cache.mtx.unlock();
   }
   else if (this->req.request_method.compare("POST") == 0) {
     std::cout << "POST";
-    this->handlePOST();
+    this->handlePOST(request_id, req_log);
   }
   else if (this->req.request_method.compare("CONNECT") == 0) {
     std::cout << "CONNECT";
-    this->handleCONNECT();
+    this->handleCONNECT(request_id, req_log);
+    req_log.log_tunnel_close(request_id);
   }
 }
 
-void Proxy::handleGet() {
+void Proxy::handleGet(long request_id, logger & req_log) {
   this->req.parseHeader();
 
   //build up the server sock
@@ -42,14 +46,15 @@ void Proxy::handleGet() {
   server.recv_http_response(this->resp);  //throw recv exception
   //send resp to client
   client.send_response(resp);  //throw send exceptio
+  req_log.log_response(request_id, resp);
 }
 
-void Proxy::handlePOST() {
+void Proxy::handlePOST(long request_id, logger & req_log) {
   //we can just use handle get to handlePOST
-  Proxy::handleGet();
+  Proxy::handleGet(request_id, req_log);
 }
 
-void Proxy::handleCONNECT() {
+void Proxy::handleCONNECT(long request_id, logger & req_log) {
   this->req.parseHeader();
 
   //build up the server sock
@@ -78,8 +83,6 @@ void Proxy::handleCONNECT() {
   std::vector<char> connect_ok(connect_ok_str.begin(), connect_ok_str.end());
   this->client.send_(connect_ok);
 
-  //std::cout << "Connection built in CONNECT" << std::endl;
-
   //send header to server
 
   fd_set readfds;
@@ -97,7 +100,7 @@ void Proxy::handleCONNECT() {
       std::vector<char> mess;
       //recv mess from client
       int status = this->client.recv_(mess);
-      // std::cout << "Received message from the client. recv: " << status << std::endl;
+
       if (status == 0) {
         //client disconnected
         exit = true;  //client may still have something to send
@@ -113,7 +116,6 @@ void Proxy::handleCONNECT() {
       //server has sent you the data
       std::vector<char> mess;
       int status = this->server.recv_(mess);
-      // std::cout << "Received message from the server. recv: " << status << std::endl;
       if (status == 0) {
         exit = true;
       }
@@ -137,20 +139,20 @@ void Proxy::handleCONNECT() {
 }
 
 //this function will check current time and
-bool expires(Response & resp, Request & req) {
+bool expires(Response & resp, Request & req, logger & req_log, long request_id) {
   //1. check if have expires filed like Expires: Wed, 21 Oct 2015 07:28:00 GMT
   auto expires_it = resp.header_kvs.find("expires");
   if (expires_it != resp.header_kvs.end()) {
     //expires can be -1 or 0
     if ((*expires_it).second.size() <= 5) {
+      req_log.log_in_cache_but_expire(request_id, Utility::get_current_time_gmt());
       return true;
     }
 
-    std::cout << "http_date in test1: " << expires_it->second << std::endl;
     std::time_t resp_expire_date = Utility::http_date_str_to_gmt(expires_it->second);
     std::time_t now = Utility::get_current_time_gmt();
     if (now > resp_expire_date) {
-      std::cout << "Now is beyong the expireation time" << std::endl;
+      req_log.log_in_cache_but_expire(request_id, resp_expire_date);
       return true;
     }
   }
@@ -160,7 +162,7 @@ bool expires(Response & resp, Request & req) {
   auto resp_no_cache = resp.cache_control_kvs.find("no-cache");
   if (req_no_cache != req.cache_control_kvs.end() ||
       resp_no_cache != resp.cache_control_kvs.end()) {
-    std::cout << "No-cache" << std::endl;
+    req_log.log_in_cache_but_expire(request_id, Utility::get_current_time_gmt());
     return true;
   }
 
@@ -175,20 +177,14 @@ bool expires(Response & resp, Request & req) {
       return true;
     }
     //convert http date string to time_t in gmt/utc
-    std::cout << "http_date in test2 is: " << http_date->second << std::endl;
+
     auto http_time = Utility::http_date_str_to_gmt(http_date->second);
     //convert max_age str to integer
     int max_age = std::stoi(resp_max_age->second);
     //get current time
     auto now = Utility::get_current_time_gmt();
-    if (http_time + max_age < now /* date + max-age < local time */) {
-      std::cout << "The http date in header is: " << http_date->second
-                << ". The timestamp is: " << http_time << std::endl;
-
-      std::cout << "Current time stamp is: " << now << std::endl;
-
-      std::cout << "Beyong the max-age" << std::endl;
-
+    if (http_time + max_age < now) {
+      req_log.log_in_cache_but_expire(request_id, http_time + max_age);
       return true;
     }
   }
@@ -197,56 +193,48 @@ bool expires(Response & resp, Request & req) {
   return false;
 }
 
-void Proxy::get_resp_from_cache_and_sent_to_client(LRUCache & cache) {
-  // req.parseHeader();
-  // req.parseCacheControl();
+void Proxy::get_resp_from_cache_and_sent_to_client(LRUCache & cache,
+                                                   logger & req_log,
+                                                   long request_id) {
   //check in cache or not
   Response * cached_resp = cache.get(req);
   if (cached_resp == NULL) {
     // not in cache
-    std::cout << "ID: Not in Cache" << std::endl;  //TODO: write into log later
-    handleNotCachedGet(cache);
+
+    req_log.log_not_in_cache(request_id);
+    handleNotCachedGet(cache, req_log, request_id);
     return;
   }
 
   //in cache
-  // this->resp = *cached_resp;
-  // std::cout << "----------------------------------------------" << std::endl;
-  // std::cout << std::string(resp.header.begin(), resp.header.end());
-  // std::cout << std::string(resp.body.begin(), resp.body.end());
-  // std::cout << "In cache resp size: " << resp.body.size() << std::endl;
-  // std::cout << "Head size: " << resp.header.size() << std::endl;
-  // std::cout << "Body size: " << resp.body.size() << std::endl;
   cached_resp->parseHeader();
 
   //check expire
-  if (!expires(*cached_resp, this->req)) {
+  if (!expires(*cached_resp, this->req, req_log, request_id)) {
     //not expire
     //check if have must-revalidate in cache-control
     auto must_reval_it_req = req.cache_control_kvs.find("must-revalidate");
     auto must_reval_it_resp = cached_resp->cache_control_kvs.find("must-revalidate");
     if (must_reval_it_req != req.cache_control_kvs.end() ||
         must_reval_it_resp != cached_resp->cache_control_kvs.end()) {
-      std::cout << "ID: in cache, requires validation" << std::endl;
-      handleRevalidate(cache);
+      req_log.log_in_cache_requre_validation(request_id);
+      handleRevalidate(cache, req_log, request_id);
     }
     else {
-      std::cout << "ID: in cache, valid" << std::endl;
-
+      // std::cout << "ID: in cache, valid" << std::endl;
+      req_log.log_in_cache_valid(request_id);
       //send the cached response to the client
-
-      std::cout << "In cache resp size: " << resp.body.size() << std::endl;
       client.send_response(*cached_resp);
+      req_log.log_response(request_id, *cached_resp);
     }
   }
   else {
     //expired needs revalidate
-    std::cout << "ID: in cache, but expired at EXPIREDTIME" << std::endl;
-    handleRevalidate(cache);
+    handleRevalidate(cache, req_log, request_id);
   }
 }
 
-void Proxy::handleNotCachedGet(LRUCache & cache) {
+void Proxy::handleNotCachedGet(LRUCache & cache, logger & req_log, long request_id) {
   // this->req.parseHeader();
 
   //build up the server sock
@@ -260,35 +248,39 @@ void Proxy::handleNotCachedGet(LRUCache & cache) {
 
   //send header and body
   server.send_request(req);  //may throw send exception
-  std::cout << "test1" << std::endl;
+
+  req_log.log_request_to_server(request_id, req);
 
   //recv response from server
   server.recv_http_response(this->resp);  //throw recv exception
-  std::cout << "test2" << std::endl;
-  //std::cout << std::string(resp.header.begin(), resp.header.end()) << std::endl;
+
+  req_log.log_resp_from_server(request_id, req);
 
   //TODO: check whether response header has no-store in cache conrtol
-  // resp.parseHeader();
-  // resp.parseCacheControl();
+
   auto no_store_it = resp.cache_control_kvs.find("no-store");
 
-  //std::cout << std::string(resp.body.begin(), resp.body.begin() + 500) << std::endl;
+  //log if resp status is 200
+  if (resp.response_code.compare("200") == 0) {
+    req_log.log_resp_cache(request_id, req, resp);
+  }
+
   if (resp.response_code.compare("200") == 0 &&
       no_store_it == resp.cache_control_kvs.end()) {
-    //update the cache
-    std::cout << "Status == 200 and no no-store, can sotre in the cache" << std::endl;
+    /* resp is 200 and server allows store, we cache the response */
     cache.put(this->req, this->resp);
     client.send_response(resp);
-    //std::cout << "Cached in handleNotCachedGet function" << std::endl;
+    req_log.log_response(request_id, resp);
   }
   else {
-    std::cout << std::string(resp.header.begin(), resp.header.end()) << std::endl;
-    std::cout << "status != 200 or no-store in the cache, does not store in the cache"
-              << std::endl;
+    /* resp not 200 or server requires no-store */
+    if (resp.response_code.compare("200") != 0) {
+      req_log.log_status_not_200(request_id, resp);
+    }
+
     client.send_response(resp);  //may throw send exception
+    req_log.log_response(request_id, resp);
   }
-  // std::cout << std::string(resp.body.begin(), resp.body.end()) << std::endl;
-  std::cout << "test3" << std::endl;
 }
 
 /*
@@ -304,7 +296,7 @@ void Proxy::handleNotCachedGet(LRUCache & cache) {
             //do nothing about the cache
       5. send the the resp in the cache to client
   */
-void Proxy::handleRevalidate(LRUCache & cache) {
+void Proxy::handleRevalidate(LRUCache & cache, logger & req_log, long request_id) {
   //build up the server sock
   this->server.hostname = req.header_kvs["host"];
   this->server.port = req.port;
@@ -314,26 +306,23 @@ void Proxy::handleRevalidate(LRUCache & cache) {
 
   std::vector<char> reval_header = makeRevalidateHeader();
   server.send_(reval_header);
+
+  req_log.log_request_to_server(request_id, req);  //log request
+
   Response reval_resp;
   server.recv_http_response(reval_resp);
 
   reval_resp.parseHeader();
+  req_log.log_resp_from_server(request_id, req);
 
-  if (reval_resp.response_code.compare("304") == 0) {
-    //not modified
-    std::cout << "Revalidation: server response 304 not modified" << std::endl;
-  }
-  else if (reval_resp.response_code.compare("200") == 0) {
-    std::cout << "Revalidation: server response 200 updated" << std::endl;
+  if (reval_resp.response_code.compare("200") == 0) {
     //update the resp in the cache
+    req_log.log_resp_update(request_id);
     cache.put(req, reval_resp);
-    std::cout << "Cached size resp header: " << cache.get(req)->header.size()
-              << std::endl;
-    std::cout << "Cached size resp body: " << cache.get(req)->body.size() << std::endl;
   }
-  else {
-    std::cout << "Revalidate other tha 304 or 200" << std::endl;
-    handleNotCachedGet(cache);
+  else if (reval_resp.response_code.compare("304") != 0) {
+    // if resp is not
+    handleNotCachedGet(cache, req_log, request_id);
   }
 
   //send the resp in the cache to client
@@ -342,8 +331,7 @@ void Proxy::handleRevalidate(LRUCache & cache) {
     throw no_resp_cache();
   }
   client.send_response(*cached_resp);
-  std::cout << "Cached size resp header: " << cache.get(req)->header.size() << std::endl;
-  std::cout << "Cached size resp body: " << cache.get(req)->body.size() << std::endl;
+  req_log.log_response(request_id, *cached_resp);
   return;
 }
 

@@ -198,6 +198,13 @@ If there is no Cache-Control or at least the request does not ask you not to use
 
 
 
+# cache lock
+When using cache in multi-thread, we have to make sure the cache data sturecure is thread safe.
+Because only get method will use cache, I add lock to the cache when there is a GET request.
+But the problem is that this approach is not efficient. I add lock to the whole cache and this means 
+the get requests will actually runs in parallel.
+A good way to improve this is to improve the granduality of the lock.
+We can add lock to each key-value pairs inside the cache.
 
     
 

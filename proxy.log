@@ -1,0 +1,61 @@
+0: CONNECT www.google.com:443 HTTP/1.1 from 98.26.48.32:7171 @ Mon Feb 21 02:49:12 2022 GMT
+1: CONNECT www.google.com:443 HTTP/1.1 from 98.26.48.32:7172 @ Mon Feb 21 02:49:14 2022 GMT
+2: CONNECT www.youtube.com:443 HTTP/1.1 from 98.26.48.32:7174 @ Mon Feb 21 02:49:15 2022 GMT
+3: CONNECT incoming.telemetry.mozilla.org:443 HTTP/1.1 from 98.26.48.32:7175 @ Mon Feb 21 02:49:15 2022 GMT
+5: CONNECT fonts.googleapis.com:443 HTTP/1.1 from 98.26.48.32:7177 @ Mon Feb 21 02:49:15 2022 GMT
+6: POST http://ocsp.pki.goog/gts1c3 HTTP/1.1 from 98.26.48.32:7178 @ Mon Feb 21 02:49:15 2022 GMT
+6: Responsing HTTP/1.1 200 OK
+4: CONNECT i.ytimg.com:443 HTTP/1.1 from 98.26.48.32:7176 @ Mon Feb 21 02:49:15 2022 GMT
+7: CONNECT accounts.google.com:443 HTTP/1.1 from 98.26.48.32:7180 @ Mon Feb 21 02:49:16 2022 GMT
+8: CONNECT img-getpocket.cdn.mozilla.net:443 HTTP/1.1 from 98.26.48.32:7166 @ Mon Feb 21 02:49:16 2022 GMT
+9: POST http://ocsp.pki.goog/gts1c3 HTTP/1.1 from 98.26.48.32:7181 @ Mon Feb 21 02:49:16 2022 GMT
+10: POST http://ocsp.pki.goog/gts1c3 HTTP/1.1 from 98.26.48.32:7182 @ Mon Feb 21 02:49:16 2022 GMT
+9: Responsing HTTP/1.1 200 OK
+10: Responsing HTTP/1.1 200 OK
+11: CONNECT googleads.g.doubleclick.net:443 HTTP/1.1 from 98.26.48.32:7183 @ Mon Feb 21 02:49:16 2022 GMT
+14: CONNECT www.gstatic.com:443 HTTP/1.1 from 98.26.48.32:7186 @ Mon Feb 21 02:49:16 2022 GMT
+15: POST http://ocsp.pki.goog/gts1c3 HTTP/1.1 from 98.26.48.32:7189 @ Mon Feb 21 02:49:16 2022 GMT
+15: Responsing HTTP/1.1 200 OK
+16: CONNECT yt3.ggpht.com:443 HTTP/1.1 from 98.26.48.32:7193 @ Mon Feb 21 02:49:16 2022 GMT
+17: CONNECT yt3.ggpht.com:443 HTTP/1.1 from 98.26.48.32:7191 @ Mon Feb 21 02:49:16 2022 GMT
+19: CONNECT yt3.ggpht.com:443 HTTP/1.1 from 98.26.48.32:7190 @ Mon Feb 21 02:49:16 2022 GMT
+18: CONNECT yt3.ggpht.com:443 HTTP/1.1 from 98.26.48.32:7194 @ Mon Feb 21 02:49:16 2022 GMT
+20: CONNECT yt3.ggpht.com:443 HTTP/1.1 from 98.26.48.32:7195 @ Mon Feb 21 02:49:16 2022 GMT
+21: CONNECT yt3.ggpht.com:443 HTTP/1.1 from 98.26.48.32:7192 @ Mon Feb 21 02:49:16 2022 GMT
+22: POST http://ocsp.pki.goog/gts1c3 HTTP/1.1 from 98.26.48.32:7197 @ Mon Feb 21 02:49:17 2022 GMT
+23: POST http://ocsp.pki.goog/gts1c3 HTTP/1.1 from 98.26.48.32:7198 @ Mon Feb 21 02:49:17 2022 GMT
+26: POST http://ocsp.pki.goog/gts1c3 HTTP/1.1 from 98.26.48.32:7200 @ Mon Feb 21 02:49:17 2022 GMT
+25: POST http://ocsp.pki.goog/gts1c3 HTTP/1.1 from 98.26.48.32:7199 @ Mon Feb 21 02:49:17 2022 GMT
+24: POST http://ocsp.pki.goog/gts1c3 HTTP/1.1 from 98.26.48.32:7201 @ Mon Feb 21 02:49:17 2022 GMT
+22: Responsing HTTP/1.1 200 OK
+23: Responsing HTTP/1.1 200 OK
+26: Responsing HTTP/1.1 200 OK
+25: Responsing HTTP/1.1 200 OK
+24: Responsing HTTP/1.1 200 OK
+17: Tunnel closed
+16: Tunnel closed
+21: Tunnel closed
+20: Tunnel closed
+19: Tunnel closed
+28: CONNECT jnn-pa.googleapis.com:443 HTTP/1.1 from 98.26.48.32:7203 @ Mon Feb 21 02:49:17 2022 GMT
+29: CONNECT static.doubleclick.net:443 HTTP/1.1 from 98.26.48.32:7204 @ Mon Feb 21 02:49:17 2022 GMT
+30: POST http://ocsp.pki.goog/gts1c3 HTTP/1.1 from 98.26.48.32:7205 @ Mon Feb 21 02:49:17 2022 GMT
+30: Responsing HTTP/1.1 200 OK
+31: CONNECT youtube.com:443 HTTP/1.1 from 98.26.48.32:7206 @ Mon Feb 21 02:49:18 2022 GMT
+33: CONNECT adservice.google.com:443 HTTP/1.1 from 98.26.48.32:7208 @ Mon Feb 21 02:49:22 2022 GMT
+34: CONNECT googleads.g.doubleclick.net:443 HTTP/1.1 from 98.26.48.32:7209 @ Mon Feb 21 02:49:22 2022 GMT
+28: Tunnel closed
+18: Tunnel closed
+34: Tunnel closed
+14: Tunnel closed
+33: Tunnel closed
+29: Tunnel closed
+8: Tunnel closed
+7: Tunnel closed
+4: Tunnel closed
+5: Tunnel closed
+3: Tunnel closed
+2: Tunnel closed
+1: Tunnel closed
+0: Tunnel closed
+31: Tunnel closed

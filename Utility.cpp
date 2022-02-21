@@ -209,3 +209,28 @@ std::time_t Utility::http_date_str_to_gmt(std::string http_date) {
 
   return gmt_date;
 }
+
+std::string Utility::get_peer_ip(int sockfd) {
+  socklen_t len;
+  struct sockaddr_storage addr;
+  char ipstr[INET6_ADDRSTRLEN];  //ipv4
+  len = sizeof addr;
+  int port;
+  getpeername(sockfd, (struct sockaddr *)&addr, &len);
+  if (addr.ss_family == AF_INET) {
+    //ipv4
+    struct sockaddr_in * s = (struct sockaddr_in *)&addr;
+    port = ntohs(s->sin_port);
+    inet_ntop(AF_INET, &s->sin_addr, ipstr, sizeof ipstr);
+  }
+  else {
+    struct sockaddr_in6 * s = (struct sockaddr_in6 *)&addr;
+    port = ntohs(s->sin6_port);
+    inet_ntop(AF_INET6, &s->sin6_addr, ipstr, sizeof ipstr);
+  }
+
+  std::string res(ipstr);
+  res += ":" + std::to_string(port);
+
+  return res;
+}

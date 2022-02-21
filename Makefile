@@ -7,7 +7,7 @@ clean:
 
 
 Main: Utility.cpp ClientSock.cpp ListenerSock.cpp test_listener.cpp Request.cpp Response.cpp ServerSock.cpp Proxy.cpp
-	g++ -g -o Main Utility.cpp ClientSock.cpp ListenerSock.cpp Request.cpp Response.cpp ServerSock.cpp Proxy.cpp Main.cpp
+	g++ -g -o Main Utility.cpp ClientSock.cpp ListenerSock.cpp Request.cpp Response.cpp ServerSock.cpp Proxy.cpp Main.cpp -lpthread
 
 Daemon:	Daemon.cpp
 	g++ -g -o Daemon Daemon.cpp

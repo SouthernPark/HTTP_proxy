@@ -1,6 +1,8 @@
 #ifndef UTILITY_H
 #define UTILITY_H
 
+#include <arpa/inet.h>
+
 #include <chrono>
 #include <iomanip>
 
@@ -85,5 +87,19 @@ class Utility {
       str[i] = std::tolower(str[i]);
     }
   }
+  /*
+    Given the gmt time t, this function will convert the time_t to string
+    format
+  */
+  static std::string time_t_to_string_gmt(time_t t) {
+    t += EST_TIME_ZONE * 3600;
+    std::stringstream ss;
+    std::string t_str = ctime(&t);
+    ss << t_str.substr(0, t_str.size() - 1) << " GMT";
+
+    return ss.str();
+  }
+
+  static std::string get_peer_ip(int sockfd);
 };
 #endif

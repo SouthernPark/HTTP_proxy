@@ -49,9 +49,9 @@ int main(void) {
     /* close stdin/stderr/stdout, open them to null */
     int status = 1;
     int devNull = open("/dev/null", O_WRONLY);
-    status = dup2(0, devNull);  //close stdin
-    status = dup2(1, devNull);  //close stdout
-    status = dup2(2, devNull);  //close stderr
+    status = dup2(devNull, STDIN_FILENO);   //close stdin
+    status = dup2(devNull, STDOUT_FILENO);  //close stdout
+    status = dup2(devNull, STDERR_FILENO);  //close stderr
 
     /* change working dir to "/" */
 

@@ -206,5 +206,16 @@ the get requests will actually runs in parallel.
 A good way to improve this is to improve the granduality of the lock.
 We can add lock to each key-value pairs inside the cache.
 
-    
+
+# dup and dup2
+
+## int dup(int oldfd);
+dup will make a newfd that is the same of oldfd and assign the newly created fd to the lowest fd that is  
+not used by the process.
+
+In other words: create a duplicated fd.
+
+## int dup2(int oldfd, int newfd);
+dup2 will make a newfd that us the same as oldfd and assign the newly created fd to newfd.
+
 

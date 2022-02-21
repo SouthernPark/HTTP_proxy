@@ -2,6 +2,7 @@
 #define LRU_H
 
 #include <deque>
+#include <mutex>
 #include <unordered_map>
 
 #include "Request.h"
@@ -11,6 +12,7 @@ class LRUCache {
   int cacheSize;
   std::unordered_map<Request, Response, RequestHashFunction> cache;
   std::deque<Request> req;
+  std::mutex mtx;
 
   LRUCache(int capacity) {
     cache.clear();
@@ -34,7 +36,6 @@ class LRUCache {
       // update queue: update it to most recent used value
       req.erase(it);
       req.push_front(key);
-
       return &(cache[key]);
     }
   }

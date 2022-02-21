@@ -1,10 +1,21 @@
 #include "Main.h"
 
+void handle_request(Proxy * proxy, LRUCache * cache, logger * req_log, long request_id) {
+  //this function will handle the request
+  try {
+    proxy->handleRequest(*cache, *req_log, request_id);
+  }
+  catch (std::exception & e) {
+    std::cerr << "Can not handle the request";
+  }
+
+  std::cout << "Thread exit" << std::endl;
+  //destroy the proxy
+  delete proxy;
+}
+
 int main(void) {
   /* initial set up */
-  //create the listener, start up
-  ListenerSock listener;
-  listener.start_up();
 
   /* 
         Becoming a daemon (fork and exit again)
@@ -38,32 +49,52 @@ int main(void) {
     /* close stdin/stderr/stdout, open them to null */
     int status = 1;
     int devNull = open("/dev/null", O_WRONLY);
-    status = dup2(0, devNull);  //close stdin
-    status = dup2(1, devNull);  //close stdout
-    status = dup2(2, devNull);  //close stderr
+    status = dup2(devNull, STDIN_FILENO);   //close stdin
+    status = dup2(devNull, STDOUT_FILENO);  //close stdout
+    status = dup2(devNull, STDERR_FILENO);  //close stderr
 
     /* change working dir to "/" */
 
     chdir("/");
+    umask(0);  //set umask to 0 give the daemon premission (open file, write file)
 
-    LRUCache cache(LRUCACHE_SIZE);
+    //fork again (not be a session leader)
+    pid = fork();
+    if (pid != 0) {
+      //parent process
+      exit(0);
+    }
+    else {
+      //variable for listener
+      ListenerSock listener;
+      listener.start_up();
 
-    /* life cycle */
-    while (true) {
-      Proxy proxy;  //create a proxy
+      //variable for cache
+      LRUCache cache(LRUCACHE_SIZE);
 
-      //listener will accept a client connect
-      //and set the connecting sockfd in client
-      listener.accept_(proxy.client);  //throw listener exception
+      //variable for log
+      logger req_log;
+      std::mutex request_id_lock;
+      long request_id = 0;
 
-      //receive a request from the client
-      proxy.handleRequest(cache);
+      //variable for thread
+      pid_t pid;
+      /* life cycle */
+      while (true) {
+        //create proxy in the heap
+        Proxy * proxy = new Proxy();
+
+        //block here and waiting for connection
+        listener.accept_(proxy->client);  //throw listener exception
+
+        //once there is a connection spawn a new thread to handle the request
+        std::thread thread(handle_request, proxy, &cache, &req_log, request_id);
+        thread.detach();  //detach the child thread from the parent thread
+
+        request_id_lock.lock();
+        request_id++;
+        request_id_lock.unlock();
+      }
     }
   }
-
-  //std::cout << std::string(proxy.req.header.begin(), proxy.req.header.end());
-  //std::cout << std::string(proxy.req.body.begin(), proxy.req.body.end());
-
-  //std::cout << std::string(proxy.resp.header.begin(), proxy.resp.header.end());
-  //std::cout << std::string(proxy.resp.body.begin(), proxy.resp.body.end());
 }

@@ -33,4 +33,12 @@ class host_port_no_find_exception : public std::exception {
   virtual const char * what() const throw() { return "Can not get the host and port\n"; }
 };
 
+class no_host : public std::exception {
+  virtual const char * what() const throw() { return "Can not get host\n"; }
+};
+
+class no_resp_cache : public std::exception {
+  virtual const char * what() const throw() { return "Can not find resp in cache\n"; }
+};
+
 #endif

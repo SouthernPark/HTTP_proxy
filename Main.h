@@ -2,10 +2,14 @@
 #define MAIN_H
 
 #include <fcntl.h>
+#include <sys/stat.h>
 #include <unistd.h>
+
+#include <thread>
 
 #include "LRUCache.h"
 #include "ListenerSock.h"
 #include "Proxy.h"
+#include "logger.h"
 
 #endif

@@ -26,6 +26,10 @@
 #define LISTENER_HOST "0.0.0.0"
 #define LISTENER_MAX_CONNECT 100
 
-#define LRUCACHE_SIZE 100
+#define LRUCACHE_SIZE 1000
+
+#define EST_TIME_ZONE 5
+
+//global variable to record the request_id
 
 #endif

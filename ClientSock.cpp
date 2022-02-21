@@ -80,3 +80,8 @@ int ClientSock::recv_rest_request(Request & resp, int haveReceive, int total) {
   }
   return status;
 }
+
+void ClientSock::send_response(Response & resp) {
+  this->send_(resp.header);  //throw send exception
+  this->send_(resp.body);
+}

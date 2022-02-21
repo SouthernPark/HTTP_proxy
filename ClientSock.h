@@ -5,6 +5,7 @@
 
 #include "MyExceptions.h"
 #include "Request.h"
+#include "Response.h"
 #include "Utility.h"
 
 class ClientSock {
@@ -76,6 +77,13 @@ class ClientSock {
         0 if the sock is closed
   */
   int recv_http_request(Request & req);
+
+  /*
+    This function will send the resp.header and resp.body to the client
+
+    Throw exceptions if some error happened
+  */
+  void send_response(Response & resp);
 
  private:
   /*

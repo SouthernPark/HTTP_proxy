@@ -9,11 +9,9 @@
 #include "Request.h"
 #include "Response.h"
 #include "ServerSock.h"
+#include "logger.h"
 
 class Proxy {
-  /*
-
-  */
  public:
   ServerSock server;
   ClientSock client;
@@ -27,7 +25,7 @@ class Proxy {
     and what type fo requests it is and call for the handle*()
     func
   */
-  void handleRequest(LRUCache & cache);
+  void handleRequest(LRUCache & cache, logger & log, long request_id);
 
   /*
     This function will handle the get request from the client sock
@@ -37,9 +35,9 @@ class Proxy {
     PS:: latter we will add cache to GET
   */
 
-  void handleGet();
-  void handlePOST();
-  void handleCONNECT();
+  void handleGet(long request_id, logger & req_log);
+  void handlePOST(long request_id, logger & req_log);
+  void handleCONNECT(long request_id, logger & req_log);
 
   /*
     This function will use the request header to find the response
@@ -69,13 +67,53 @@ class Proxy {
                   update the LRU cache and send the cached resp and return
 
     B. no cached resp in LRU
-      get the resp from the client directly and check if have 
-
-
-    if there is no cached response:
+      get the resp from the client directly and check if have no-cache
+      
+      if there is no cached response and 200 OK:
+        cache the response.
+      
+      send the response to the user
+        
        
   */
-  void get_resp_from_cache_and_sent_to_client();
+  void get_resp_from_cache_and_sent_to_client(LRUCache & cache,
+                                              logger & req_log,
+                                              long request_id);
+
+  /*
+    By calling this function, you ensure that their is no cached response. 
+    This function will:
+    get the resp from the client directly and check if have no-cache
+      
+    if there is no cached response and 200 OK:
+        cache the response.
+      
+    send the response to the user
+  */
+  void handleNotCachedGet(LRUCache & cache, logger & req_log, long request_id);
+
+  /*
+    This function will:
+      1. add E-tag to the req header if there is any
+      2. add last-modified to the req header if there is any
+
+      3. send the req to server 
+      4. check response 
+        a. 200 OK ?
+            update the resp in the cache
+        b. 304 not modified ?
+            //do nothing about the cache
+      5. send the the resp in the cache to client
+  */
+  void handleRevalidate(LRUCache & cache, logger & log, long request_id);
+
+  /*
+    helper function that will 
+      1. add E-tag to the req header if there is any
+      2. add last-modified to the req header if there is any
+  */
+
+  std::vector<char> makeRevalidateHeader();
 };
 
 #endif

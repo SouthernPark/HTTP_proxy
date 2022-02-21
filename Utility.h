@@ -1,6 +1,11 @@
 #ifndef UTILITY_H
 #define UTILITY_H
 
+#include <arpa/inet.h>
+
+#include <chrono>
+#include <iomanip>
+
 #include "macro.h"
 
 class Utility {
@@ -59,5 +64,42 @@ class Utility {
   static std::vector<std::string> * split(std::string & input, std::string & delimiter);
 
   static int sendAll(int fd, char * buf, int * len);
+
+  /*
+    This function will get the current time in gmt time zone 
+    (or we say utc time zone or http time zone)
+
+    return type: time_t is a long int which represents how many seconds
+    from now to 1970/01/01 
+
+    use https://www.epochconverter.com/ to test
+  */
+  static std::time_t get_current_time_gmt();
+
+  /*
+    The format of the http data is:
+    Mon, 14 Feb 2022 21:06:11 GMT
+  */
+  static std::time_t http_date_str_to_gmt(std::string http_date);
+
+  static void str_to_lowercase(std::string & str) {
+    for (int i = 0; i < str.size(); i++) {
+      str[i] = std::tolower(str[i]);
+    }
+  }
+  /*
+    Given the gmt time t, this function will convert the time_t to string
+    format
+  */
+  static std::string time_t_to_string_gmt(time_t t) {
+    t += EST_TIME_ZONE * 3600;
+    std::stringstream ss;
+    std::string t_str = ctime(&t);
+    ss << t_str.substr(0, t_str.size() - 1) << " GMT";
+
+    return ss.str();
+  }
+
+  static std::string get_peer_ip(int sockfd);
 };
 #endif

@@ -173,3 +173,64 @@ std::vector<std::string> * Utility::split(std::string & input, std::string & del
 
   return res;
 }
+
+std::time_t Utility::get_current_time_gmt() {
+  auto curr = std::chrono::system_clock::now();
+
+  //convert to time_t
+  time_t curr_time_t = std::chrono::system_clock::to_time_t(curr);
+  return curr_time_t;
+}
+
+/*
+
+  Mon, 14 Feb 2022 21:06:11 GMT
+  %a, %d %b %Y %H:%M:%S GMT
+
+  21:06:11
+  "%H:%M:%S"
+*/
+std::time_t Utility::http_date_str_to_gmt(std::string http_date) {
+  std::tm t = {};
+  std::istringstream ss(http_date);
+
+  ss.imbue(std::locale(""));
+
+  ss >> std::get_time(&t, "%a, %d %b %Y %H:%M:%S GMT");
+  if (ss.fail()) {
+    std::cout << "http date is: " << http_date << std::endl;
+    std::cout << "failed to get http date" << std::endl;
+  }
+
+  //http date in local time zone
+  std::time_t local_date = std::mktime(&t);
+
+  std::time_t gmt_date = local_date - EST_TIME_ZONE * 3600;
+
+  return gmt_date;
+}
+
+std::string Utility::get_peer_ip(int sockfd) {
+  socklen_t len;
+  struct sockaddr_storage addr;
+  char ipstr[INET6_ADDRSTRLEN];  //ipv4
+  len = sizeof addr;
+  int port;
+  getpeername(sockfd, (struct sockaddr *)&addr, &len);
+  if (addr.ss_family == AF_INET) {
+    //ipv4
+    struct sockaddr_in * s = (struct sockaddr_in *)&addr;
+    port = ntohs(s->sin_port);
+    inet_ntop(AF_INET, &s->sin_addr, ipstr, sizeof ipstr);
+  }
+  else {
+    struct sockaddr_in6 * s = (struct sockaddr_in6 *)&addr;
+    port = ntohs(s->sin6_port);
+    inet_ntop(AF_INET6, &s->sin6_addr, ipstr, sizeof ipstr);
+  }
+
+  std::string res(ipstr);
+  res += ":" + std::to_string(port);
+
+  return res;
+}

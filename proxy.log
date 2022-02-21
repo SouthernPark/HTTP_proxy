@@ -1,19 +1,91 @@
-0: GET http://go.com/ HTTP/1.1 from 98.26.48.32:13366 @ Mon Feb 21 04:03:33 2022 GMT
-0: not in cache
-0: Requesting GET http://go.com/ HTTP/1.1 from go.com
-0: Received GET http://go.com/ HTTP/1.1 from go.com
-0: cached, expires at Mon Feb 21 04:26:39 2022 GMT
-0: Responsing HTTP/1.1 200 OK
-1: GET http://go.com/ HTTP/1.1 from 98.26.48.32:13370 @ Mon Feb 21 04:03:35 2022 GMT
-1: in cache, valid
+1: GET http://detectportal.firefox.com/canonical.html HTTP/1.1 from 98.26.48.32:10312 @ Mon Feb 21 05:18:19 2022 GMT
+1: GET http://detectportal.firefox.com/canonical.html HTTP/1.1 from 98.26.48.32:10312 @ Mon Feb 21 05:18:19 2022 GMT
+Mon Feb 21 05:18:19 2022 GMT
+1: not in cache
+1: Requesting GET http://detectportal.firefox.com/canonical.html HTTP/1.1 from detectportal.firefox.com
+2: CONNECT spocs.getpocket.com:443 HTTP/1.1 from 98.26.48.32:10314 @ Mon Feb 21 05:18:19 2022 GMT
+1: Received GET http://detectportal.firefox.com/canonical.html HTTP/1.1 from detectportal.firefox.com
+1: cached, expires at Mon Feb 21 05:18:19 2022 GMT
+1: cached, but requires re-validation
 1: Responsing HTTP/1.1 200 OK
-2: GET http://go.com/ HTTP/1.1 from 98.26.48.32:13373 @ Mon Feb 21 04:03:38 2022 GMT
-2: in cache, valid
-2: Responsing HTTP/1.1 200 OK
-3: GET http://www.google.com/ HTTP/1.1 from 98.26.48.32:13381 @ Mon Feb 21 04:03:57 2022 GMT
-3: not in cache
-3: Requesting GET http://www.google.com/ HTTP/1.1 from www.google.com
-3: Received GET http://www.google.com/ HTTP/1.1 from www.google.com
-3: cached, expires at Sun Dec 31 00:00:00 1899 GMT
-3: cached, expires at Mon Feb 21 04:03:57 2022 GMT
-3: Responsing HTTP/1.1 200 OK
+3: CONNECT firefox.settings.services.mozilla.com:443 HTTP/1.1 from 98.26.48.32:10318 @ Mon Feb 21 05:18:19 2022 GMT
+4: GET http://detectportal.firefox.com/success.txt?ipv4 HTTP/1.1 from 98.26.48.32:10319 @ Mon Feb 21 05:18:19 2022 GMT
+4: not in cache
+4: Requesting GET http://detectportal.firefox.com/success.txt?ipv4 HTTP/1.1 from detectportal.firefox.com
+4: Received GET http://detectportal.firefox.com/success.txt?ipv4 HTTP/1.1 from detectportal.firefox.com
+4: cached, expires at Mon Feb 21 02:20:30 2022 GMT
+4: cached, but requires re-validation
+4: Responsing HTTP/1.1 200 OK
+6: CONNECT img-getpocket.cdn.mozilla.net:443 HTTP/1.1 from 98.26.48.32:10321 @ Mon Feb 21 05:18:19 2022 GMT
+5: CONNECT img-getpocket.cdn.mozilla.net:443 HTTP/1.1 from 98.26.48.32:10323 @ Mon Feb 21 05:18:19 2022 GMT
+12: CONNECT safebrowsing.googleapis.com:443 HTTP/1.1 from 98.26.48.32:10320 @ Mon Feb 21 05:18:19 2022 GMT
+7: CONNECT img-getpocket.cdn.mozilla.net:443 HTTP/1.1 from 98.26.48.32:10325 @ Mon Feb 21 05:18:19 2022 GMT
+10: CONNECT img-getpocket.cdn.mozilla.net:443 HTTP/1.1 from 98.26.48.32:10326 @ Mon Feb 21 05:18:19 2022 GMT
+9: CONNECT img-getpocket.cdn.mozilla.net:443 HTTP/1.1 from 98.26.48.32:10324 @ Mon Feb 21 05:18:19 2022 GMT
+8: POST http://r3.o.lencr.org/ HTTP/1.1 from 98.26.48.32:10327 @ Mon Feb 21 05:18:19 2022 GMT
+11: CONNECT img-getpocket.cdn.mozilla.net:443 HTTP/1.1 from 98.26.48.32:10322 @ Mon Feb 21 05:18:19 2022 GMT
+8: Responsing HTTP/1.1 200 OK
+13: CONNECT incoming.telemetry.mozilla.org:443 HTTP/1.1 from 98.26.48.32:10330 @ Mon Feb 21 05:18:19 2022 GMT
+14: CONNECT firefox.settings.services.mozilla.com:443 HTTP/1.1 from 98.26.48.32:10331 @ Mon Feb 21 05:18:19 2022 GMT
+16: POST http://r3.o.lencr.org/ HTTP/1.1 from 98.26.48.32:10332 @ Mon Feb 21 05:18:20 2022 GMT
+15: POST http://ocsp.pki.goog/gts1c3 HTTP/1.1 from 98.26.48.32:10333 @ Mon Feb 21 05:18:20 2022 GMT
+18: CONNECT incoming.telemetry.mozilla.org:443 HTTP/1.1 from 98.26.48.32:10336 @ Mon Feb 21 05:18:20 2022 GMT
+17: POST http://r3.o.lencr.org/ HTTP/1.1 from 98.26.48.32:10335 @ Mon Feb 21 05:18:20 2022 GMT
+20: POST http://r3.o.lencr.org/ HTTP/1.1 from 98.26.48.32:10334 @ Mon Feb 21 05:18:20 2022 GMT
+19: CONNECT incoming.telemetry.mozilla.org:443 HTTP/1.1 from 98.26.48.32:10337 @ Mon Feb 21 05:18:20 2022 GMT
+16: Responsing HTTP/1.1 200 OK
+20: Responsing HTTP/1.1 200 OK
+17: Responsing HTTP/1.1 200 OK
+21: POST http://r3.o.lencr.org/ HTTP/1.1 from 98.26.48.32:10338 @ Mon Feb 21 05:18:20 2022 GMT
+15: Responsing HTTP/1.1 200 OK
+21: Responsing HTTP/1.1 200 OK
+22: CONNECT contile-images.services.mozilla.com:443 HTTP/1.1 from 98.26.48.32:10339 @ Mon Feb 21 05:18:20 2022 GMT
+23: POST http://ocsp.digicert.com/ HTTP/1.1 from 98.26.48.32:10340 @ Mon Feb 21 05:18:20 2022 GMT
+25: CONNECT contile-images.services.mozilla.com:443 HTTP/1.1 from 98.26.48.32:10341 @ Mon Feb 21 05:18:20 2022 GMT
+24: CONNECT incoming.telemetry.mozilla.org:443 HTTP/1.1 from 98.26.48.32:10343 @ Mon Feb 21 05:18:20 2022 GMT
+26: CONNECT incoming.telemetry.mozilla.org:443 HTTP/1.1 from 98.26.48.32:10342 @ Mon Feb 21 05:18:20 2022 GMT
+7: Tunnel closed
+5: Tunnel closed
+27: POST http://ocsp.digicert.com/ HTTP/1.1 from 98.26.48.32:10345 @ Mon Feb 21 05:18:20 2022 GMT
+23: Responsing HTTP/1.1 200 OK
+11: Tunnel closed
+6: Tunnel closed
+12: Tunnel closed
+28: CONNECT incoming.telemetry.mozilla.org:443 HTTP/1.1 from 98.26.48.32:10346 @ Mon Feb 21 05:18:20 2022 GMT
+10: Tunnel closed
+29: POST http://ocsp.digicert.com/ HTTP/1.1 from 98.26.48.32:10347 @ Mon Feb 21 05:18:20 2022 GMT
+27: Responsing HTTP/1.1 200 OK
+30: POST http://r3.o.lencr.org/ HTTP/1.1 from 98.26.48.32:10348 @ Mon Feb 21 05:18:20 2022 GMT
+30: Responsing HTTP/1.1 200 OK
+31: POST http://r3.o.lencr.org/ HTTP/1.1 from 98.26.48.32:10349 @ Mon Feb 21 05:18:20 2022 GMT
+31: Responsing HTTP/1.1 200 OK
+29: Responsing HTTP/1.1 200 OK
+22: Tunnel closed
+24: Tunnel closed
+19: Tunnel closed
+26: Tunnel closed
+32: CONNECT www.google.com:443 HTTP/1.1 from 98.26.48.32:10362 @ Mon Feb 21 05:18:23 2022 GMT
+33: POST http://ocsp.pki.goog/gts1c3 HTTP/1.1 from 98.26.48.32:10363 @ Mon Feb 21 05:18:23 2022 GMT
+33: Responsing HTTP/1.1 200 OK
+34: CONNECT www.google.com:443 HTTP/1.1 from 98.26.48.32:10364 @ Mon Feb 21 05:18:24 2022 GMT
+35: POST http://ocsp.pki.goog/gts1c3 HTTP/1.1 from 98.26.48.32:10365 @ Mon Feb 21 05:18:24 2022 GMT
+35: Responsing HTTP/1.1 200 OK
+38: CONNECT adservice.google.com:443 HTTP/1.1 from 98.26.48.32:10369 @ Mon Feb 21 05:18:25 2022 GMT
+39: POST http://ocsp.pki.goog/gts1c3 HTTP/1.1 from 98.26.48.32:10370 @ Mon Feb 21 05:18:25 2022 GMT
+39: Responsing HTTP/1.1 200 OK
+40: CONNECT googleads.g.doubleclick.net:443 HTTP/1.1 from 98.26.48.32:10371 @ Mon Feb 21 05:18:25 2022 GMT
+41: POST http://ocsp.pki.goog/gts1c3 HTTP/1.1 from 98.26.48.32:10372 @ Mon Feb 21 05:18:25 2022 GMT
+41: Responsing HTTP/1.1 200 OK
+38: Tunnel closed
+18: Tunnel closed
+40: Tunnel closed
+25: Tunnel closed
+0: Tunnel closed
+14: Tunnel closed
+9: Tunnel closed
+32: Tunnel closed
+3: Tunnel closed
+34: Tunnel closed
+13: Tunnel closed
+28: Tunnel closed
+2: Tunnel closed

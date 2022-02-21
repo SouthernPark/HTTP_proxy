@@ -219,3 +219,21 @@ In other words: create a duplicated fd.
 dup2 will make a newfd that us the same as oldfd and assign the newly created fd to newfd.
 
 
+# docker command
+
+## ADD <src> <dest>
+add the files in the local computer src from the build path to docker image dest.
+
+## WOEKDIR <path>
+set the working dir, things will run here.
+Where the entry will go.
+
+## docker exec -it <container_id> bash
+enter into the running container using bash
+
+## docker run --rm -it <image_id> bash
+enter into the stale image when running up
+
+
+
+

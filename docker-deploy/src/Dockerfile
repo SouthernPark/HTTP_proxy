@@ -4,5 +4,6 @@ RUN apt-get install -y g++ make
 RUN mkdir /var/log/erss
 RUN touch /var/log/erss/proxy.log
 RUN mkdir /code
-ADD . /code/ 
-RUN ["chmod", "+x", "/code/run.sh"]
+ADD . /code 
+WORKDIR /code
+RUN ["chmod", "+x", "run.sh"]

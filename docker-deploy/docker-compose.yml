@@ -3,9 +3,11 @@ version: '2'
 services:
   proxy:
     build: ./src
-    command: bash -c "./code/run.sh"
+    command: bash -c "./run.sh"
     volumes:
-      - ./var/log/erss:/var/log/erss
-      - ./src:/code
+      - data-volume:/var/log/erss
     ports:
       - "12345:12345"
+
+volumes:
+  data-volume:

@@ -6,6 +6,9 @@ clean:
 	rm Main
 	rm Daemon
 
+clean_test:
+	rm test_*
+
 
 
 Main: Utility.o Request.o Response.o ClientSock.o ServerSock.o ListenerSock.o Proxy.o

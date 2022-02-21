@@ -1,11 +1,11 @@
 #ifndef LISTENERSOCK_H
 #define LISTENERSOCK_H
 
+#include <errno.h>
 #include <sys/socket.h>
 
 #include "ClientSock.h"
 #include "macro.h"
-
 class ListenerSock {
  public:
   int sockfd;

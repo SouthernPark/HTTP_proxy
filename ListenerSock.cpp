@@ -22,6 +22,7 @@ int ListenerSock::start_up() {
   status =
       bind(this->sockfd, this->service_info->ai_addr, this->service_info->ai_addrlen);
   if (status == -1) {
+    std::cout << "The error number is " << errno << std::endl;
     std::cerr << "Can not bind the sock" << std::endl;
     return -1;
   }

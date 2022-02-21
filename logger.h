@@ -16,7 +16,7 @@ class logger {
   std::stringstream ss;
 
  public:
-  logger() { outfile.open("proxy.log", std::ios::out); }
+  logger() { outfile.open("/home/ql143/ECE_568/http-proxy/proxy.log", std::ios::out); }
   ~logger() { outfile.close(); }
   void writeToLog(std::string str) {
     if (outfile.is_open()) {

@@ -2,6 +2,7 @@
 #define MAIN_H
 
 #include <fcntl.h>
+#include <sys/stat.h>
 #include <unistd.h>
 
 #include <thread>

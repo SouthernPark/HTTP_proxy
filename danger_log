@@ -1,0 +1,30 @@
+# CONNECT
+Before using multi process / multo threads, the CONNECT request will stop and block there.  
+The reason for that is after CONNECT, the website will usually send GET or POST request by  
+the JavaScript to get resources to render the html.  
+
+The issue is that CONNECT will use select to monitor between client and server. This operation
+will block until there is one sock active.  When there is another GET/POST request after CONNECT,
+the GET/POST will not get answered causing the page to shut down.
+
+Therefore, before testing the CONNECT, we have to finish the multi process.
+
+# Unauthenticated Connection
+The http-proxy does not authenticate the incoming request, which means every person can send request
+to our proxy and our proxy will handle the request for them.
+
+But some mallicious user may send too many requests to the proxy to prevent other users to access the proxy.
+
+# Exception
+The exception guarantee is basic. 
+I use unique_ptr when I want to use memo in the heap, when there is a exception thrwos, the stack will be 
+unwinded and the heap memo in will be freed because the unique_ptr will be unwind from stack.
+
+The use of unique_ptr ensures that I will not have dangling pointers.
+Therefore, the exception guarantee is basic.
+
+
+
+
+
+

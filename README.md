@@ -2,6 +2,17 @@
 
 An HTTP proxy will be implemented with C++. 
 
+## how to run
+
+        1. write using docker
+            cd docker-deploy
+            sudo docker-compose up
+        2. run as a Daemon locally
+            cd src
+            make
+            ./Daemon
+
+
 # Some mistakes encountered during this project.
 
 1. getaddrinfo(param1, param2, param3, struct addrinfo ** servinfo);

@@ -14,7 +14,7 @@ int ServerSock::recv_response_header(Response & resp) {
     }
     //add buffer to header
     header.insert(header.end(), buffer.begin(), buffer.end());
-    //check if there is \r\n in the header
+    //check if there is \r\n\r\n in the header
     CRLF_index = std::search(header.begin(), header.end(), CRLF, CRLF + strlen(CRLF));
     if (CRLF_index != header.end()) {
       break;

@@ -1,0 +1,9 @@
+0: GET /cache_test HTTP/1.1 from 127.0.0.1:36070 @ Fri Feb 24 06:43:51 2023 GMT
+0: not in cache
+0: Requesting GET /cache_test HTTP/1.1 from vcm-27911.vm.duke.edu:5000
+0: Received GET /cache_test HTTP/1.1 from vcm-27911.vm.duke.edu:5000
+0: cached, expires at Tue Feb 28 10:43:51 2023 GMT
+0: Responsing HTTP/1.1 200 OK
+1: GET /cache_test HTTP/1.1 from 127.0.0.1:36080 @ Fri Feb 24 06:43:53 2023 GMT
+1: in cache, valid
+1: Responsing HTTP/1.1 200 OK

@@ -65,6 +65,7 @@ void Request::parseHeader() {
 
   std::unique_ptr<std::vector<std::string> > host_and_port(
       Utility::split((*host_it).second, del2));
+  this->host = (*host_and_port)[0];
 
   if ((*host_and_port).size() == 2) {
     this->port = (*host_and_port)[1];

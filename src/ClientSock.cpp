@@ -4,7 +4,7 @@
     This function will get heep response from the sockfd and transfer
     the byte stream to Response object including the header and body.
 
-    return 
+    return
         -1 if can not recv
         0 if the sock is closed
 */
@@ -15,6 +15,7 @@ int ClientSock::recv_http_request(Request & resp) {
   std::vector<char> buffer;
   std::vector<char>::iterator CRLF_index;
   const char * CRLF = "\r\n\r\n";
+
   //recv header end until we detec the CRLF
   while (1) {
     status = Utility::recv_(this->sockfd, buffer);

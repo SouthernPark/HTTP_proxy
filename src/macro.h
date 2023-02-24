@@ -30,7 +30,7 @@
 
 #define EST_TIME_ZONE 5
 
-#define LOGFILELOCATION "/home/ql143/ECE_568/http-proxy/src/proxy.log"
+#define LOGFILELOCATION "./proxy.log"
 
 //global variable to record the request_id
 

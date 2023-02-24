@@ -2,13 +2,16 @@
 
 void Proxy::handleRequest(LRUCache & cache, logger & req_log, long request_id) {
   //recv the request header and body if there is
+  std:: cout << "test1" << std::endl;
   int status = this->client.recv_http_request(this->req);
+  std:: cout << "test2" << std::endl;
   req_log.log_new_request(request_id, req, client.sockfd);
   if (status == -1) {
     std::cerr << "HandleGet in Proxy.cpp can not recv" << std::endl;
     throw recv_exception();
   }
   //parse the request header
+
   this->req.parseHeader();
 
   //check the method of header
@@ -33,7 +36,7 @@ void Proxy::handleGet(long request_id, logger & req_log) {
   this->req.parseHeader();
 
   //build up the server sock
-  this->server.hostname = req.header_kvs["host"];
+  this->server.hostname = req.host;
   this->server.port = req.port;
 
   server.buildSocket();  //throw sock_exception if sock can not build
@@ -238,7 +241,7 @@ void Proxy::handleNotCachedGet(LRUCache & cache, logger & req_log, long request_
   // this->req.parseHeader();
 
   //build up the server sock
-  this->server.hostname = req.header_kvs["host"];
+  this->server.hostname = req.host;
   this->server.port = req.port;
 
   server.buildSocket();  //throw sock_exception if sock can not build
@@ -288,8 +291,8 @@ void Proxy::handleNotCachedGet(LRUCache & cache, logger & req_log, long request_
       1. add E-tag to the req header if there is any
       2. add last-modified to the req header if there is any
 
-      3. send the req to server 
-      4. check response 
+      3. send the req to server
+      4. check response
         a. 200 OK ?
             update the resp in the cache
         b. 304 not modified ?
@@ -298,7 +301,8 @@ void Proxy::handleNotCachedGet(LRUCache & cache, logger & req_log, long request_
   */
 void Proxy::handleRevalidate(LRUCache & cache, logger & req_log, long request_id) {
   //build up the server sock
-  this->server.hostname = req.header_kvs["host"];
+
+  this->server.hostname = req.host;
   this->server.port = req.port;
 
   server.buildSocket();  //throw sock_exception if sock can not build
